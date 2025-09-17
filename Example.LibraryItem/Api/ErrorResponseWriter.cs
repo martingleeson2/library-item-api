@@ -17,15 +17,15 @@ public class ErrorResponseWriter(TimeProvider timeProvider) : IErrorResponseWrit
 
         var payload = new ValidationErrorResponseDto
         {
-            error = ErrorCodes.VALIDATION_ERROR,
-            message = "The request contains validation errors",
-            validation_errors = exception.Errors.Select(e => new ValidationError 
+            Error = ErrorCodes.VALIDATION_ERROR,
+            Message = "The request contains validation errors",
+            ValidationErrors = exception.Errors.Select(e => new ValidationError 
             { 
-                field = e.PropertyName, 
-                message = e.ErrorMessage 
+                Field = e.PropertyName, 
+                Message = e.ErrorMessage 
             }).ToList(),
-            timestamp = _timeProvider.GetUtcNow().UtcDateTime,
-            request_id = requestId
+            Timestamp = _timeProvider.GetUtcNow().UtcDateTime,
+            RequestId = requestId
         };
 
         await context.Response.WriteAsJsonAsync(payload, cancellationToken);
@@ -40,11 +40,11 @@ public class ErrorResponseWriter(TimeProvider timeProvider) : IErrorResponseWrit
 
         var payload = new ErrorResponseDto
         {
-            error = errorCode,
-            message = message,
-            timestamp = _timeProvider.GetUtcNow().UtcDateTime,
-            request_id = requestId,
-            path = context.Request.Path.ToString()
+            Error = errorCode,
+            Message = message,
+            Timestamp = _timeProvider.GetUtcNow().UtcDateTime,
+            RequestId = requestId,
+            Path = context.Request.Path.ToString()
         };
 
         await context.Response.WriteAsJsonAsync(payload, cancellationToken);

@@ -6,6 +6,7 @@ namespace Example.LibraryItem.Infrastructure
 {
     public class LibraryDbContext(DbContextOptions<LibraryDbContext> options) : DbContext(options)
     {
+        private const char ListSeparator = '|';
         public DbSet<Item> Items => Set<Item>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -23,14 +24,14 @@ namespace Example.LibraryItem.Infrastructure
 
             item.Property(i => i.Contributors)
                 .HasConversion(new ValueConverter<List<string>, string>(
-                    v => string.Join('|', v),
-                    v => string.IsNullOrEmpty(v) ? new List<string>() : v.Split('|', StringSplitOptions.RemoveEmptyEntries).ToList()))
+                    v => string.Join(ListSeparator, v),
+                    v => string.IsNullOrEmpty(v) ? new List<string>() : v.Split(ListSeparator, StringSplitOptions.RemoveEmptyEntries).ToList()))
                 .HasColumnName("Contributors");
 
             item.Property(i => i.Subjects)
                 .HasConversion(new ValueConverter<List<string>, string>(
-                    v => string.Join('|', v),
-                    v => string.IsNullOrEmpty(v) ? new List<string>() : v.Split('|', StringSplitOptions.RemoveEmptyEntries).ToList()))
+                    v => string.Join(ListSeparator, v),
+                    v => string.IsNullOrEmpty(v) ? new List<string>() : v.Split(ListSeparator, StringSplitOptions.RemoveEmptyEntries).ToList()))
                 .HasColumnName("Subjects");
 
             item.Property(i => i.DigitalUrl)

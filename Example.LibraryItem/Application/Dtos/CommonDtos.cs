@@ -1,32 +1,20 @@
+using System.Text.Json.Serialization;
+
 namespace Example.LibraryItem.Application.Dtos
 {
-    public record Links
-    {
-        public Link? self { get; init; }
-        public Link? next { get; init; }
-        public Link? previous { get; init; }
-        public Link? first { get; init; }
-        public Link? last { get; init; }
-    }
-
-    public record Link
-    {
-        public required string href { get; init; }
-    }
-
     public record PaginationDto
     {
-        public required int page { get; init; }
-        public required int limit { get; init; }
-        public required int total_items { get; init; }
-        public required int total_pages { get; init; }
-        public required bool has_next { get; init; }
-        public required bool has_previous { get; init; }
+        [JsonPropertyName("page")] public required int Page { get; init; }
+        [JsonPropertyName("limit")] public required int Limit { get; init; }
+        [JsonPropertyName("total_items")] public required int TotalItems { get; init; }
+        [JsonPropertyName("total_pages")] public required int TotalPages { get; init; }
+        [JsonPropertyName("has_next")] public required bool HasNext { get; init; }
+        [JsonPropertyName("has_previous")] public required bool HasPrevious { get; init; }
     }
 
     public record ValidationError
     {
-        public required string field { get; init; }
-        public required string message { get; init; }
+        [JsonPropertyName("field")] public required string Field { get; init; }
+        [JsonPropertyName("message")] public required string Message { get; init; }
     }
 }

@@ -1,7 +1,11 @@
 using Example.LibraryItem.Api;
 using Example.LibraryItem.Api.Authentication;
 using Example.LibraryItem.Api.Extensions;
+using Example.LibraryItem.Api.Interfaces;
+using Example.LibraryItem.Api.Services;
 using Example.LibraryItem.Application;
+using Example.LibraryItem.Application.Interfaces;
+using Example.LibraryItem.Application.Services;
 using Example.LibraryItem.Infrastructure;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -15,6 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Services
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSwaggerGen(c =>
 {
@@ -100,6 +105,14 @@ builder.Services.AddScoped<ICreateItemCommandHandler, CreateItemHandler>();
 builder.Services.AddScoped<IUpdateItemCommandHandler, UpdateItemHandler>();
 builder.Services.AddScoped<IPatchItemCommandHandler, PatchItemHandler>();
 builder.Services.AddScoped<IDeleteItemCommandHandler, DeleteItemHandler>();
+
+// Application services
+builder.Services.AddScoped<IItemValidationService, ItemValidationService>();
+builder.Services.AddScoped<IDateTimeProvider, SystemDateTimeProvider>();
+builder.Services.AddScoped<IUserContext, HttpUserContext>();
+
+// API helpers
+builder.Services.AddScoped<IEndpointHelpers, EndpointHelpers>();
 
 // Health Checks
 builder.Services

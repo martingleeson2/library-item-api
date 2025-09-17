@@ -60,11 +60,11 @@ public class ListItemsHandlerTests
 
         // Assert
         result.ShouldNotBeNull();
-        result.data.Count.ShouldBe(3);
-        result.pagination.total_items.ShouldBe(5);
-        result.pagination.page.ShouldBe(1);
-        result.pagination.limit.ShouldBe(3);
-        result.pagination.total_pages.ShouldBe(2);
+    result.Data.Count.ShouldBe(3);
+    result.Pagination.TotalItems.ShouldBe(5);
+    result.Pagination.Page.ShouldBe(1);
+    result.Pagination.Limit.ShouldBe(3);
+    result.Pagination.TotalPages.ShouldBe(2);
     }
 
     [Test]
@@ -117,9 +117,9 @@ public class ListItemsHandlerTests
 
         // Assert
         result.ShouldNotBeNull();
-        result.data.Count.ShouldBe(1);
-        result.data[0].title.ShouldBe("The Great Gatsby");
-        result.pagination.total_items.ShouldBe(1);
+    result.Data.Count.ShouldBe(1);
+    result.Data[0].Title.ShouldBe("The Great Gatsby");
+    result.Pagination.TotalItems.ShouldBe(1);
     }
 
     [Test]
@@ -172,10 +172,10 @@ public class ListItemsHandlerTests
 
         // Assert
         result.ShouldNotBeNull();
-        result.data.Count.ShouldBe(1);
-        result.data[0].title.ShouldBe("Checked Out Book");
-        result.data[0].status.ShouldBe(ItemStatus.checked_out);
-        result.pagination.total_items.ShouldBe(1);
+    result.Data.Count.ShouldBe(1);
+    result.Data[0].Title.ShouldBe("Checked Out Book");
+    result.Data[0].Status.ShouldBe(ItemStatus.checked_out);
+    result.Pagination.TotalItems.ShouldBe(1);
     }
 
     [Test]
@@ -199,8 +199,8 @@ public class ListItemsHandlerTests
 
         // Assert
         result.ShouldNotBeNull();
-        result.data.Count.ShouldBe(0);
-        result.pagination.total_items.ShouldBe(0);
-        result.pagination.total_pages.ShouldBe(0);
+    result.Data.Count.ShouldBe(0);
+    result.Pagination.TotalItems.ShouldBe(0);
+    result.Pagination.TotalPages.ShouldBe(0);
     }
 }

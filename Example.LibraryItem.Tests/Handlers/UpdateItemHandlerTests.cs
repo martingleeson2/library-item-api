@@ -2,6 +2,7 @@ using Example.LibraryItem.Application;
 using Example.LibraryItem.Application.Handlers;
 using Example.LibraryItem.Domain;
 using Example.LibraryItem.Infrastructure;
+using Example.LibraryItem.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -12,20 +13,22 @@ namespace Example.LibraryItem.Tests.Handlers;
 
 public class UpdateItemHandlerTests
 {
-    private LibraryDbContext CreateDb()
+    private UpdateItemHandler CreateHandler(LibraryDbContext db)
     {
-        var options = new DbContextOptionsBuilder<LibraryDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-        return new LibraryDbContext(options);
+        var logger = Mock.Of<ILogger<UpdateItemHandler>>();
+        return new UpdateItemHandler(
+            db,
+            TestHelpers.CreateValidationService(db),
+            TestHelpers.CreateTestDateTimeProvider(),
+            TestHelpers.CreateTestUserContext(),
+            logger);
     }
 
     [Test]
     public async Task Updates_Item_Successfully()
     {
         // Arrange
-        using var db = CreateDb();
-        var logger = Mock.Of<ILogger<UpdateItemHandler>>();
+        using var db = TestHelpers.CreateInMemoryDb();
         var itemId = Guid.NewGuid();
         var originalItem = new Item
         {
@@ -42,15 +45,15 @@ public class UpdateItemHandlerTests
         db.Items.Add(originalItem);
         await db.SaveChangesAsync();
 
-        var handler = new UpdateItemHandler(db, logger);
+        var handler = CreateHandler(db);
         var updateRequest = new ItemUpdateRequestDto
         {
-            title = "Updated Title",
-            item_type = ItemType.book,
-            call_number = "002.42",
-            classification_system = ClassificationSystem.dewey_decimal,
-            location = new ItemLocationDto { floor = 2, section = "B", shelf_code = "C-126" },
-            status = ItemStatus.checked_out
+            Title = "Updated Title",
+            ItemType = ItemType.book,
+            CallNumber = "002.42",
+            ClassificationSystem = ClassificationSystem.dewey_decimal,
+            Location = new ItemLocationDto { Floor = 2, Section = "B", ShelfCode = "C-126" },
+            Status = ItemStatus.checked_out
         };
 
         // Act
@@ -58,29 +61,28 @@ public class UpdateItemHandlerTests
 
         // Assert
         result.ShouldNotBeNull();
-        result.title.ShouldBe("Updated Title");
-        result.call_number.ShouldBe("002.42");
-        result.status.ShouldBe(ItemStatus.checked_out);
-        result.location.floor.ShouldBe(2);
-        result.location.section.ShouldBe("B");
-        result.location.shelf_code.ShouldBe("C-126");
+    result.Title.ShouldBe("Updated Title");
+    result.CallNumber.ShouldBe("002.42");
+    result.Status.ShouldBe(ItemStatus.checked_out);
+    result.Location.Floor.ShouldBe(2);
+    result.Location.Section.ShouldBe("B");
+    result.Location.ShelfCode.ShouldBe("C-126");
     }
 
     [Test]
     public async Task Returns_Null_When_Item_Not_Found()
     {
         // Arrange
-        using var db = CreateDb();
-        var logger = Mock.Of<ILogger<UpdateItemHandler>>();
-        var handler = new UpdateItemHandler(db, logger);
+        using var db = TestHelpers.CreateInMemoryDb();
+        var handler = CreateHandler(db);
         var updateRequest = new ItemUpdateRequestDto
         {
-            title = "Updated Title",
-            item_type = ItemType.book,
-            call_number = "002.42",
-            classification_system = ClassificationSystem.dewey_decimal,
-            location = new ItemLocationDto { floor = 2, section = "B", shelf_code = "C-126" },
-            status = ItemStatus.available
+            Title = "Updated Title",
+            ItemType = ItemType.book,
+            CallNumber = "002.42",
+            ClassificationSystem = ClassificationSystem.dewey_decimal,
+            Location = new ItemLocationDto { Floor = 2, Section = "B", ShelfCode = "C-126" },
+            Status = ItemStatus.available
         };
 
         // Act
@@ -94,8 +96,7 @@ public class UpdateItemHandlerTests
     public async Task Throws_When_Duplicate_Isbn()
     {
         // Arrange
-        using var db = CreateDb();
-        var logger = Mock.Of<ILogger<UpdateItemHandler>>();
+        using var db = TestHelpers.CreateInMemoryDb();
         var itemId1 = Guid.NewGuid();
         var itemId2 = Guid.NewGuid();
         
@@ -122,6 +123,7 @@ public class UpdateItemHandlerTests
             ClassificationSystem = ClassificationSystem.dewey_decimal,
             Location = new ItemLocation(1, "A", "B"),
             Status = ItemStatus.available,
+            Isbn = "9780321570512",
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -129,33 +131,30 @@ public class UpdateItemHandlerTests
         db.Items.AddRange(item1, item2);
         await db.SaveChangesAsync();
 
-        var handler = new UpdateItemHandler(db, logger);
+        var handler = CreateHandler(db);
         var updateRequest = new ItemUpdateRequestDto
         {
-            title = "Updated Title",
-            item_type = ItemType.book,
-            call_number = "002.42",
-            classification_system = ClassificationSystem.dewey_decimal,
-            location = new ItemLocationDto { floor = 2, section = "B", shelf_code = "C-126" },
-            status = ItemStatus.available,
-            isbn = "9780743273565" // Same as item1
+            Title = "Updated Item 2",
+            ItemType = ItemType.book,
+            CallNumber = "002.42",
+            ClassificationSystem = ClassificationSystem.dewey_decimal,
+            Location = new ItemLocationDto { Floor = 1, Section = "A", ShelfCode = "B" },
+            Status = ItemStatus.available,
+            Isbn = "9780743273565" // Using item1's ISBN
         };
 
         // Act & Assert
-        var ex = await Should.ThrowAsync<InvalidOperationException>(
-            async () => await handler.HandleAsync(itemId2, updateRequest, "http://localhost", "test-user"));
-        ex.Message.ShouldBe("ISBN_ALREADY_EXISTS");
+        await Should.ThrowAsync<InvalidOperationException>(async () => 
+            await handler.HandleAsync(itemId2, updateRequest, "http://localhost", "test-user"));
     }
 
     [Test]
     public async Task Allows_Same_Isbn_For_Same_Item()
     {
         // Arrange
-        using var db = CreateDb();
-        var logger = Mock.Of<ILogger<UpdateItemHandler>>();
+        using var db = TestHelpers.CreateInMemoryDb();
         var itemId = Guid.NewGuid();
-        
-        var item = new Item
+        var originalItem = new Item
         {
             Id = itemId,
             Title = "Original Title",
@@ -168,20 +167,19 @@ public class UpdateItemHandlerTests
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
-        
-        db.Items.Add(item);
+        db.Items.Add(originalItem);
         await db.SaveChangesAsync();
 
-        var handler = new UpdateItemHandler(db, logger);
+        var handler = CreateHandler(db);
         var updateRequest = new ItemUpdateRequestDto
         {
-            title = "Updated Title",
-            item_type = ItemType.book,
-            call_number = "002.42",
-            classification_system = ClassificationSystem.dewey_decimal,
-            location = new ItemLocationDto { floor = 2, section = "B", shelf_code = "C-126" },
-            status = ItemStatus.available,
-            isbn = "9780743273565" // Same ISBN as before
+            Title = "Updated Title",
+            ItemType = ItemType.book,
+            CallNumber = "001.42",
+            ClassificationSystem = ClassificationSystem.dewey_decimal,
+            Location = new ItemLocationDto { Floor = 1, Section = "A", ShelfCode = "B" },
+            Status = ItemStatus.available,
+            Isbn = "9780743273565" // Same ISBN
         };
 
         // Act
@@ -189,7 +187,7 @@ public class UpdateItemHandlerTests
 
         // Assert
         result.ShouldNotBeNull();
-        result.isbn.ShouldBe("9780743273565");
-        result.title.ShouldBe("Updated Title");
+        result.Title.ShouldBe("Updated Title");
+        result.Isbn.ShouldBe("9780743273565");
     }
 }

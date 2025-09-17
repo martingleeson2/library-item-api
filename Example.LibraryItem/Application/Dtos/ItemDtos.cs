@@ -1,48 +1,48 @@
+using System.Text.Json.Serialization;
 using Example.LibraryItem.Domain;
 
 namespace Example.LibraryItem.Application.Dtos
 {
     public record ItemLocationDto
     {
-        public required int floor { get; init; }
-        public required string section { get; init; }
-        public required string shelf_code { get; init; }
-        public string? wing { get; init; }
-        public string? position { get; init; }
-        public string? notes { get; init; }
+        [JsonPropertyName("floor")] public required int Floor { get; init; }
+        [JsonPropertyName("section")] public required string Section { get; init; }
+        [JsonPropertyName("shelf_code")] public required string ShelfCode { get; init; }
+        [JsonPropertyName("wing")] public string? Wing { get; init; }
+        [JsonPropertyName("position")] public string? Position { get; init; }
+        [JsonPropertyName("notes")] public string? Notes { get; init; }
     }
 
     public record ItemDto
     {
-        public required Guid id { get; init; }
-        public required string title { get; init; }
-        public string? subtitle { get; init; }
-        public string? author { get; init; }
-        public List<string>? contributors { get; init; }
-        public string? isbn { get; init; }
-        public string? issn { get; init; }
-        public string? publisher { get; init; }
-        public DateOnly? publication_date { get; init; }
-        public string? edition { get; init; }
-        public int? pages { get; init; }
-        public string? language { get; init; }
-        public required ItemType item_type { get; init; }
-        public required string call_number { get; init; }
-        public required ClassificationSystem classification_system { get; init; }
-        public string? collection { get; init; }
-        public required ItemLocationDto location { get; init; }
-        public required ItemStatus status { get; init; }
-        public string? barcode { get; init; }
-        public DateOnly? acquisition_date { get; init; }
-        public decimal? cost { get; init; }
-        public string? condition_notes { get; init; }
-        public string? description { get; init; }
-        public List<string>? subjects { get; init; }
-        public Uri? digital_url { get; init; }
-        public required DateTime created_at { get; init; }
-        public required DateTime updated_at { get; init; }
-        public string? created_by { get; init; }
-        public string? updated_by { get; init; }
-        public Links? _links { get; init; }
+        [JsonPropertyName("id")] public required Guid Id { get; init; }
+        [JsonPropertyName("title")] public required string Title { get; init; }
+        [JsonPropertyName("subtitle")] public string? Subtitle { get; init; }
+        [JsonPropertyName("author")] public string? Author { get; init; }
+        [JsonPropertyName("contributors")] public List<string>? Contributors { get; init; }
+        [JsonPropertyName("isbn")] public string? Isbn { get; init; }
+        [JsonPropertyName("issn")] public string? Issn { get; init; }
+        [JsonPropertyName("publisher")] public string? Publisher { get; init; }
+        [JsonPropertyName("publication_date")] public DateOnly? PublicationDate { get; init; }
+        [JsonPropertyName("edition")] public string? Edition { get; init; }
+        [JsonPropertyName("pages")] public int? Pages { get; init; }
+        [JsonPropertyName("language")] public string? Language { get; init; }
+        [JsonPropertyName("item_type")] public required ItemType ItemType { get; init; }
+        [JsonPropertyName("call_number")] public required string CallNumber { get; init; }
+        [JsonPropertyName("classification_system")] public required ClassificationSystem ClassificationSystem { get; init; }
+        [JsonPropertyName("collection")] public string? Collection { get; init; }
+        [JsonPropertyName("location")] public required ItemLocationDto Location { get; init; }
+        [JsonPropertyName("status")] public required ItemStatus Status { get; init; }
+        [JsonPropertyName("barcode")] public string? Barcode { get; init; }
+        [JsonPropertyName("acquisition_date")] public DateOnly? AcquisitionDate { get; init; }
+        [JsonPropertyName("cost")] public decimal? Cost { get; init; }
+        [JsonPropertyName("condition_notes")] public string? ConditionNotes { get; init; }
+        [JsonPropertyName("description")] public string? Description { get; init; }
+        [JsonPropertyName("subjects")] public List<string>? Subjects { get; init; }
+        [JsonPropertyName("digital_url")] public Uri? DigitalUrl { get; init; }
+        [JsonPropertyName("created_at")] public required DateTime CreatedAt { get; init; }
+        [JsonPropertyName("updated_at")] public required DateTime UpdatedAt { get; init; }
+        [JsonPropertyName("created_by")] public string? CreatedBy { get; init; }
+        [JsonPropertyName("updated_by")] public string? UpdatedBy { get; init; }
     }
 }

@@ -7,77 +7,79 @@ namespace Example.LibraryItem.Application
         public static ItemDto ToDto(this Item i, string basePath)
             => new()
             {
-                id = i.Id,
-                title = i.Title,
-                subtitle = i.Subtitle,
-                author = i.Author,
-                contributors = i.Contributors,
-                isbn = i.Isbn,
-                issn = i.Issn,
-                publisher = i.Publisher,
-                publication_date = i.PublicationDate,
-                edition = i.Edition,
-                pages = i.Pages,
-                language = i.Language,
-                item_type = i.ItemType,
-                call_number = i.CallNumber,
-                classification_system = i.ClassificationSystem,
-                collection = i.Collection,
-                location = new ItemLocationDto
-                {
-                    floor = i.Location.Floor,
-                    section = i.Location.Section,
-                    shelf_code = i.Location.ShelfCode,
-                    wing = i.Location.Wing,
-                    position = i.Location.Position,
-                    notes = i.Location.Notes
-                },
-                status = i.Status,
-                barcode = i.Barcode,
-                acquisition_date = i.AcquisitionDate,
-                cost = i.Cost,
-                condition_notes = i.ConditionNotes,
-                description = i.Description,
-                subjects = i.Subjects,
-                digital_url = i.DigitalUrl,
-                created_at = i.CreatedAt,
-                updated_at = i.UpdatedAt,
-                created_by = i.CreatedBy,
-                updated_by = i.UpdatedBy,
-                _links = new Links
-                {
-                    self = new Link { href = $"{basePath}/v1/items/{i.Id}" }
-                }
+                Id = i.Id,
+                Title = i.Title,
+                Subtitle = i.Subtitle,
+                Author = i.Author,
+                Contributors = i.Contributors,
+                Isbn = i.Isbn,
+                Issn = i.Issn,
+                Publisher = i.Publisher,
+                PublicationDate = i.PublicationDate,
+                Edition = i.Edition,
+                Pages = i.Pages,
+                Language = i.Language,
+                ItemType = i.ItemType,
+                CallNumber = i.CallNumber,
+                ClassificationSystem = i.ClassificationSystem,
+                Collection = i.Collection,
+                Location = i.Location.ToDto(),
+                Status = i.Status,
+                Barcode = i.Barcode,
+                AcquisitionDate = i.AcquisitionDate,
+                Cost = i.Cost,
+                ConditionNotes = i.ConditionNotes,
+                Description = i.Description,
+                Subjects = i.Subjects,
+                DigitalUrl = i.DigitalUrl,
+                CreatedAt = i.CreatedAt,
+                UpdatedAt = i.UpdatedAt,
+                CreatedBy = i.CreatedBy,
+                UpdatedBy = i.UpdatedBy
             };
+
+        public static ItemLocationDto ToDto(this ItemLocation location)
+            => new()
+            {
+                Floor = location.Floor,
+                Section = location.Section,
+                ShelfCode = location.ShelfCode,
+                Wing = location.Wing,
+                Position = location.Position,
+                Notes = location.Notes
+            };
+
+        public static ItemLocation ToEntity(this ItemLocationDto dto)
+            => ItemLocation.Create(dto.Floor, dto.Section, dto.ShelfCode, dto.Wing, dto.Position, dto.Notes);
 
         public static Item ToEntity(this ItemCreateRequestDto d, DateTime utcNow, string? user)
             => new()
             {
                 Id = Guid.NewGuid(),
-                Title = d.title,
-                Subtitle = d.subtitle,
-                Author = d.author,
-                Contributors = d.contributors ?? new List<string>(),
-                Isbn = d.isbn,
-                Issn = d.issn,
-                Publisher = d.publisher,
-                PublicationDate = d.publication_date,
-                Edition = d.edition,
-                Pages = d.pages,
-                Language = d.language,
-                ItemType = d.item_type,
-                CallNumber = d.call_number,
-                ClassificationSystem = d.classification_system,
-                Collection = d.collection,
-                Location = ItemLocation.Create(d.location.floor, d.location.section, d.location.shelf_code, d.location.wing, d.location.position, d.location.notes),
-                Status = d.status ?? ItemStatus.available,
-                Barcode = d.barcode,
-                AcquisitionDate = d.acquisition_date,
-                Cost = d.cost,
-                ConditionNotes = d.condition_notes,
-                Description = d.description,
-                Subjects = d.subjects ?? new List<string>(),
-                DigitalUrl = d.digital_url,
+                Title = d.Title,
+                Subtitle = d.Subtitle,
+                Author = d.Author,
+                Contributors = d.Contributors ?? [],
+                Isbn = d.Isbn,
+                Issn = d.Issn,
+                Publisher = d.Publisher,
+                PublicationDate = d.PublicationDate,
+                Edition = d.Edition,
+                Pages = d.Pages,
+                Language = d.Language,
+                ItemType = d.ItemType,
+                CallNumber = d.CallNumber,
+                ClassificationSystem = d.ClassificationSystem,
+                Collection = d.Collection,
+                Location = d.Location.ToEntity(),
+                Status = d.Status ?? ItemStatus.available,
+                Barcode = d.Barcode,
+                AcquisitionDate = d.AcquisitionDate,
+                Cost = d.Cost,
+                ConditionNotes = d.ConditionNotes,
+                Description = d.Description,
+                Subjects = d.Subjects ?? [],
+                DigitalUrl = d.DigitalUrl,
                 CreatedAt = utcNow,
                 UpdatedAt = utcNow,
                 CreatedBy = user,
@@ -86,71 +88,139 @@ namespace Example.LibraryItem.Application
 
         public static void ApplyUpdate(this Item entity, ItemUpdateRequestDto d, DateTime utcNow, string? user)
         {
-            entity.Title = d.title;
-            entity.Subtitle = d.subtitle;
-            entity.Author = d.author;
-            entity.Contributors = d.contributors ?? new List<string>();
-            entity.Isbn = d.isbn;
-            entity.Issn = d.issn;
-            entity.Publisher = d.publisher;
-            entity.PublicationDate = d.publication_date;
-            entity.Edition = d.edition;
-            entity.Pages = d.pages;
-            entity.Language = d.language;
-            entity.ItemType = d.item_type;
-            entity.CallNumber = d.call_number;
-            entity.ClassificationSystem = d.classification_system;
-            entity.Collection = d.collection;
-            entity.Location = ItemLocation.Create(d.location.floor, d.location.section, d.location.shelf_code, d.location.wing, d.location.position, d.location.notes);
-            entity.Status = d.status;
-            entity.Barcode = d.barcode;
-            entity.AcquisitionDate = d.acquisition_date;
-            entity.Cost = d.cost;
-            entity.ConditionNotes = d.condition_notes;
-            entity.Description = d.description;
-            entity.Subjects = d.subjects ?? new List<string>();
-            entity.DigitalUrl = d.digital_url;
-            entity.UpdatedAt = utcNow;
-            entity.UpdatedBy = user;
+            var data = new ItemUpdateData(
+                d.Title, d.Subtitle, d.Author, d.Contributors, d.Isbn, d.Issn,
+                d.Publisher, d.PublicationDate, d.Edition, d.Pages, d.Language,
+                d.ItemType, d.CallNumber, d.ClassificationSystem, d.Collection,
+                d.Location?.ToEntity(), d.Status, d.Barcode, d.AcquisitionDate,
+                d.Cost, d.ConditionNotes, d.Description, d.Subjects, d.DigitalUrl
+            );
+            ApplyFullUpdate(entity, data, utcNow, user);
         }
 
         public static void ApplyPatch(this Item entity, ItemPatchRequestDto d, DateTime utcNow, string? user)
         {
-            entity.Title = d.title ?? entity.Title;
-            entity.Subtitle = d.subtitle ?? entity.Subtitle;
-            entity.Author = d.author ?? entity.Author;
-            entity.Contributors = d.contributors ?? entity.Contributors;
-            entity.Isbn = d.isbn ?? entity.Isbn;
-            entity.Issn = d.issn ?? entity.Issn;
-            entity.Publisher = d.publisher ?? entity.Publisher;
-            entity.PublicationDate = d.publication_date ?? entity.PublicationDate;
-            entity.Edition = d.edition ?? entity.Edition;
-            entity.Pages = d.pages ?? entity.Pages;
-            entity.Language = d.language ?? entity.Language;
-            entity.ItemType = d.item_type ?? entity.ItemType;
-            entity.CallNumber = d.call_number ?? entity.CallNumber;
-            entity.ClassificationSystem = d.classification_system ?? entity.ClassificationSystem;
-            entity.Collection = d.collection ?? entity.Collection;
-            if (d.location != null)
-            {
-                entity.Location = ItemLocation.Create(
-                    d.location.floor,
-                    d.location.section,
-                    d.location.shelf_code,
-                    d.location.wing,
-                    d.location.position,
-                    d.location.notes);
-            }
-            entity.Status = d.status ?? entity.Status;
-            entity.Barcode = d.barcode ?? entity.Barcode;
-            entity.AcquisitionDate = d.acquisition_date ?? entity.AcquisitionDate;
-            entity.Cost = d.cost ?? entity.Cost;
-            entity.ConditionNotes = d.condition_notes ?? entity.ConditionNotes;
-            entity.Description = d.description ?? entity.Description;
-            entity.Subjects = d.subjects ?? entity.Subjects;
-            entity.DigitalUrl = d.digital_url ?? entity.DigitalUrl;
+            var data = new ItemPartialUpdateData(
+                d.Title, d.Subtitle, d.Author, d.Contributors, d.Isbn, d.Issn,
+                d.Publisher, d.PublicationDate, d.Edition, d.Pages, d.Language,
+                d.ItemType, d.CallNumber, d.ClassificationSystem, d.Collection,
+                d.Location?.ToEntity(), d.Status, d.Barcode, d.AcquisitionDate,
+                d.Cost, d.ConditionNotes, d.Description, d.Subjects, d.DigitalUrl
+            );
+            ApplyPartialUpdate(entity, data, utcNow, user);
+        }
+        private static void ApplyFullUpdate(Item entity, ItemUpdateData d, DateTime utcNow, string? user)
+        {
+            entity.Title = d.Title;
+            entity.Subtitle = d.Subtitle;
+            entity.Author = d.Author;
+            entity.Contributors = d.Contributors ?? [];
+            entity.Isbn = d.Isbn;
+            entity.Issn = d.Issn;
+            entity.Publisher = d.Publisher;
+            entity.PublicationDate = d.PublicationDate;
+            entity.Edition = d.Edition;
+            entity.Pages = d.Pages;
+            entity.Language = d.Language;
+            entity.ItemType = d.ItemType;
+            entity.CallNumber = d.CallNumber;
+            entity.ClassificationSystem = d.ClassificationSystem;
+            entity.Collection = d.Collection;
+            if (d.Location != null) entity.Location = d.Location;
+            entity.Status = d.Status;
+            entity.Barcode = d.Barcode;
+            entity.AcquisitionDate = d.AcquisitionDate;
+            entity.Cost = d.Cost;
+            entity.ConditionNotes = d.ConditionNotes;
+            entity.Description = d.Description;
+            entity.Subjects = d.Subjects ?? [];
+            entity.DigitalUrl = d.DigitalUrl;
             entity.UpdatedAt = utcNow;
             entity.UpdatedBy = user;
         }
+
+        private static void ApplyPartialUpdate(Item entity, ItemPartialUpdateData d, DateTime utcNow, string? user)
+        {
+            if (d.Title != null) entity.Title = d.Title;
+            if (d.Subtitle != null) entity.Subtitle = d.Subtitle;
+            if (d.Author != null) entity.Author = d.Author;
+            if (d.Contributors != null) entity.Contributors = d.Contributors;
+            if (d.Isbn != null) entity.Isbn = d.Isbn;
+            if (d.Issn != null) entity.Issn = d.Issn;
+            if (d.Publisher != null) entity.Publisher = d.Publisher;
+            if (d.PublicationDate != null) entity.PublicationDate = d.PublicationDate;
+            if (d.Edition != null) entity.Edition = d.Edition;
+            if (d.Pages != null) entity.Pages = d.Pages;
+            if (d.Language != null) entity.Language = d.Language;
+            if (d.ItemType != null) entity.ItemType = d.ItemType.Value;
+            if (d.CallNumber != null) entity.CallNumber = d.CallNumber;
+            if (d.ClassificationSystem != null) entity.ClassificationSystem = d.ClassificationSystem.Value;
+            if (d.Collection != null) entity.Collection = d.Collection;
+            if (d.Location != null) entity.Location = d.Location;
+            if (d.Status != null) entity.Status = d.Status.Value;
+            if (d.Barcode != null) entity.Barcode = d.Barcode;
+            if (d.AcquisitionDate != null) entity.AcquisitionDate = d.AcquisitionDate;
+            if (d.Cost != null) entity.Cost = d.Cost;
+            if (d.ConditionNotes != null) entity.ConditionNotes = d.ConditionNotes;
+            if (d.Description != null) entity.Description = d.Description;
+            if (d.Subjects != null) entity.Subjects = d.Subjects;
+            if (d.DigitalUrl != null) entity.DigitalUrl = d.DigitalUrl;
+            entity.UpdatedAt = utcNow;
+            entity.UpdatedBy = user;
+        }
+
+        private readonly record struct ItemUpdateData(
+            string Title,
+            string? Subtitle,
+            string? Author,
+            List<string>? Contributors,
+            string? Isbn,
+            string? Issn,
+            string? Publisher,
+            DateOnly? PublicationDate,
+            string? Edition,
+            int? Pages,
+            string? Language,
+            ItemType ItemType,
+            string CallNumber,
+            ClassificationSystem ClassificationSystem,
+            string? Collection,
+            ItemLocation? Location,
+            ItemStatus Status,
+            string? Barcode,
+            DateOnly? AcquisitionDate,
+            decimal? Cost,
+            string? ConditionNotes,
+            string? Description,
+            List<string>? Subjects,
+            Uri? DigitalUrl
+        );
+
+        private readonly record struct ItemPartialUpdateData(
+            string? Title,
+            string? Subtitle,
+            string? Author,
+            List<string>? Contributors,
+            string? Isbn,
+            string? Issn,
+            string? Publisher,
+            DateOnly? PublicationDate,
+            string? Edition,
+            int? Pages,
+            string? Language,
+            ItemType? ItemType,
+            string? CallNumber,
+            ClassificationSystem? ClassificationSystem,
+            string? Collection,
+            ItemLocation? Location,
+            ItemStatus? Status,
+            string? Barcode,
+            DateOnly? AcquisitionDate,
+            decimal? Cost,
+            string? ConditionNotes,
+            string? Description,
+            List<string>? Subjects,
+            Uri? DigitalUrl
+        );
     }
 }

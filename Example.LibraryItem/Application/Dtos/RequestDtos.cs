@@ -1,88 +1,89 @@
+using System.Text.Json.Serialization;
 using Example.LibraryItem.Domain;
 
 namespace Example.LibraryItem.Application.Dtos
 {
     public record ItemCreateRequestDto
     {
-        public required string title { get; init; }
-        public string? subtitle { get; init; }
-        public string? author { get; init; }
-        public List<string>? contributors { get; init; }
-        public string? isbn { get; init; }
-        public string? issn { get; init; }
-        public string? publisher { get; init; }
-        public DateOnly? publication_date { get; init; }
-        public string? edition { get; init; }
-        public int? pages { get; init; }
-        public string? language { get; init; }
-        public required ItemType item_type { get; init; }
-        public required string call_number { get; init; }
-        public required ClassificationSystem classification_system { get; init; }
-        public string? collection { get; init; }
-        public required ItemLocationDto location { get; init; }
-        public ItemStatus? status { get; init; }
-        public string? barcode { get; init; }
-        public DateOnly? acquisition_date { get; init; }
-        public decimal? cost { get; init; }
-        public string? condition_notes { get; init; }
-        public string? description { get; init; }
-        public List<string>? subjects { get; init; }
-        public Uri? digital_url { get; init; }
+        [JsonPropertyName("title")] public required string Title { get; init; }
+        [JsonPropertyName("subtitle")] public string? Subtitle { get; init; }
+        [JsonPropertyName("author")] public string? Author { get; init; }
+        [JsonPropertyName("contributors")] public List<string>? Contributors { get; init; }
+        [JsonPropertyName("isbn")] public string? Isbn { get; init; }
+        [JsonPropertyName("issn")] public string? Issn { get; init; }
+        [JsonPropertyName("publisher")] public string? Publisher { get; init; }
+        [JsonPropertyName("publication_date")] public DateOnly? PublicationDate { get; init; }
+        [JsonPropertyName("edition")] public string? Edition { get; init; }
+        [JsonPropertyName("pages")] public int? Pages { get; init; }
+        [JsonPropertyName("language")] public string? Language { get; init; }
+        [JsonPropertyName("item_type")] public required ItemType ItemType { get; init; }
+        [JsonPropertyName("call_number")] public required string CallNumber { get; init; }
+        [JsonPropertyName("classification_system")] public required ClassificationSystem ClassificationSystem { get; init; }
+        [JsonPropertyName("collection")] public string? Collection { get; init; }
+        [JsonPropertyName("location")] public required ItemLocationDto Location { get; init; }
+        [JsonPropertyName("status")] public ItemStatus? Status { get; init; }
+        [JsonPropertyName("barcode")] public string? Barcode { get; init; }
+        [JsonPropertyName("acquisition_date")] public DateOnly? AcquisitionDate { get; init; }
+        [JsonPropertyName("cost")] public decimal? Cost { get; init; }
+        [JsonPropertyName("condition_notes")] public string? ConditionNotes { get; init; }
+        [JsonPropertyName("description")] public string? Description { get; init; }
+        [JsonPropertyName("subjects")] public List<string>? Subjects { get; init; }
+        [JsonPropertyName("digital_url")] public Uri? DigitalUrl { get; init; }
     }
 
     public record ItemUpdateRequestDto
     {
-        public required string title { get; init; }
-        public string? subtitle { get; init; }
-        public string? author { get; init; }
-        public List<string>? contributors { get; init; }
-        public string? isbn { get; init; }
-        public string? issn { get; init; }
-        public string? publisher { get; init; }
-        public DateOnly? publication_date { get; init; }
-        public string? edition { get; init; }
-        public int? pages { get; init; }
-        public string? language { get; init; }
-        public required ItemType item_type { get; init; }
-        public required string call_number { get; init; }
-        public required ClassificationSystem classification_system { get; init; }
-        public string? collection { get; init; }
-        public required ItemLocationDto location { get; init; }
-        public required ItemStatus status { get; init; }
-        public string? barcode { get; init; }
-        public DateOnly? acquisition_date { get; init; }
-        public decimal? cost { get; init; }
-        public string? condition_notes { get; init; }
-        public string? description { get; init; }
-        public List<string>? subjects { get; init; }
-        public Uri? digital_url { get; init; }
+        [JsonPropertyName("title")] public required string Title { get; init; }
+        [JsonPropertyName("subtitle")] public string? Subtitle { get; init; }
+        [JsonPropertyName("author")] public string? Author { get; init; }
+        [JsonPropertyName("contributors")] public List<string>? Contributors { get; init; }
+        [JsonPropertyName("isbn")] public string? Isbn { get; init; }
+        [JsonPropertyName("issn")] public string? Issn { get; init; }
+        [JsonPropertyName("publisher")] public string? Publisher { get; init; }
+        [JsonPropertyName("publication_date")] public DateOnly? PublicationDate { get; init; }
+        [JsonPropertyName("edition")] public string? Edition { get; init; }
+        [JsonPropertyName("pages")] public int? Pages { get; init; }
+        [JsonPropertyName("language")] public string? Language { get; init; }
+        [JsonPropertyName("item_type")] public required ItemType ItemType { get; init; }
+        [JsonPropertyName("call_number")] public required string CallNumber { get; init; }
+        [JsonPropertyName("classification_system")] public required ClassificationSystem ClassificationSystem { get; init; }
+        [JsonPropertyName("collection")] public string? Collection { get; init; }
+        [JsonPropertyName("location")] public required ItemLocationDto Location { get; init; }
+        [JsonPropertyName("status")] public required ItemStatus Status { get; init; }
+        [JsonPropertyName("barcode")] public string? Barcode { get; init; }
+        [JsonPropertyName("acquisition_date")] public DateOnly? AcquisitionDate { get; init; }
+        [JsonPropertyName("cost")] public decimal? Cost { get; init; }
+        [JsonPropertyName("condition_notes")] public string? ConditionNotes { get; init; }
+        [JsonPropertyName("description")] public string? Description { get; init; }
+        [JsonPropertyName("subjects")] public List<string>? Subjects { get; init; }
+        [JsonPropertyName("digital_url")] public Uri? DigitalUrl { get; init; }
     }
 
     public record ItemPatchRequestDto
     {
-        public string? title { get; init; }
-        public string? subtitle { get; init; }
-        public string? author { get; init; }
-        public List<string>? contributors { get; init; }
-        public string? isbn { get; init; }
-        public string? issn { get; init; }
-        public string? publisher { get; init; }
-        public DateOnly? publication_date { get; init; }
-        public string? edition { get; init; }
-        public int? pages { get; init; }
-        public string? language { get; init; }
-        public ItemType? item_type { get; init; }
-        public string? call_number { get; init; }
-        public ClassificationSystem? classification_system { get; init; }
-        public string? collection { get; init; }
-        public ItemLocationDto? location { get; init; }
-        public ItemStatus? status { get; init; }
-        public string? barcode { get; init; }
-        public DateOnly? acquisition_date { get; init; }
-        public decimal? cost { get; init; }
-        public string? condition_notes { get; init; }
-        public string? description { get; init; }
-        public List<string>? subjects { get; init; }
-        public Uri? digital_url { get; init; }
+        [JsonPropertyName("title")] public string? Title { get; init; }
+        [JsonPropertyName("subtitle")] public string? Subtitle { get; init; }
+        [JsonPropertyName("author")] public string? Author { get; init; }
+        [JsonPropertyName("contributors")] public List<string>? Contributors { get; init; }
+        [JsonPropertyName("isbn")] public string? Isbn { get; init; }
+        [JsonPropertyName("issn")] public string? Issn { get; init; }
+        [JsonPropertyName("publisher")] public string? Publisher { get; init; }
+        [JsonPropertyName("publication_date")] public DateOnly? PublicationDate { get; init; }
+        [JsonPropertyName("edition")] public string? Edition { get; init; }
+        [JsonPropertyName("pages")] public int? Pages { get; init; }
+        [JsonPropertyName("language")] public string? Language { get; init; }
+        [JsonPropertyName("item_type")] public ItemType? ItemType { get; init; }
+        [JsonPropertyName("call_number")] public string? CallNumber { get; init; }
+        [JsonPropertyName("classification_system")] public ClassificationSystem? ClassificationSystem { get; init; }
+        [JsonPropertyName("collection")] public string? Collection { get; init; }
+        [JsonPropertyName("location")] public ItemLocationDto? Location { get; init; }
+        [JsonPropertyName("status")] public ItemStatus? Status { get; init; }
+        [JsonPropertyName("barcode")] public string? Barcode { get; init; }
+        [JsonPropertyName("acquisition_date")] public DateOnly? AcquisitionDate { get; init; }
+        [JsonPropertyName("cost")] public decimal? Cost { get; init; }
+        [JsonPropertyName("condition_notes")] public string? ConditionNotes { get; init; }
+        [JsonPropertyName("description")] public string? Description { get; init; }
+        [JsonPropertyName("subjects")] public List<string>? Subjects { get; init; }
+        [JsonPropertyName("digital_url")] public Uri? DigitalUrl { get; init; }
     }
 }

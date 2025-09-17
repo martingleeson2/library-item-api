@@ -32,26 +32,22 @@ public class DtoMappingTests
 
         // Assert
         dto.ShouldNotBeNull();
-        dto.id.ShouldBe(item.Id);
-        dto.title.ShouldBe(item.Title);
-        dto.item_type.ShouldBe(item.ItemType);
-        dto.call_number.ShouldBe(item.CallNumber);
-        dto.classification_system.ShouldBe(item.ClassificationSystem);
-        dto.status.ShouldBe(item.Status);
-        dto.isbn.ShouldBe(item.Isbn);
-        dto.publisher.ShouldBe(item.Publisher);
-        dto.publication_date.ShouldBe(item.PublicationDate);
-        dto.created_at.ShouldBe(item.CreatedAt);
-        dto.updated_at.ShouldBe(item.UpdatedAt);
+        dto.Id.ShouldBe(item.Id);
+        dto.Title.ShouldBe(item.Title);
+        dto.ItemType.ShouldBe(item.ItemType);
+        dto.CallNumber.ShouldBe(item.CallNumber);
+        dto.ClassificationSystem.ShouldBe(item.ClassificationSystem);
+        dto.Status.ShouldBe(item.Status);
+        dto.Isbn.ShouldBe(item.Isbn);
+        dto.Publisher.ShouldBe(item.Publisher);
+        dto.PublicationDate.ShouldBe(item.PublicationDate);
+        dto.CreatedAt.ShouldBe(item.CreatedAt);
+        dto.UpdatedAt.ShouldBe(item.UpdatedAt);
         
-        dto.location.ShouldNotBeNull();
-        dto.location.floor.ShouldBe(2);
-        dto.location.section.ShouldBe("Fiction");
-        dto.location.shelf_code.ShouldBe("F-123");
-        
-        dto._links.ShouldNotBeNull();
-        dto._links.self.ShouldNotBeNull();
-        dto._links.self.href.ShouldBe($"http://localhost/v1/items/{item.Id}");
+        dto.Location.ShouldNotBeNull();
+        dto.Location.Floor.ShouldBe(2);
+        dto.Location.Section.ShouldBe("Fiction");
+        dto.Location.ShelfCode.ShouldBe("F-123");
     }
 
     [Test]
@@ -60,14 +56,14 @@ public class DtoMappingTests
         // Arrange
         var createDto = new ItemCreateRequestDto
         {
-            title = "New Book",
-            item_type = ItemType.book,
-            call_number = "002.42",
-            classification_system = ClassificationSystem.dewey_decimal,
-            location = new ItemLocationDto { floor = 3, section = "History", shelf_code = "H-456" },
-            isbn = "9780743273566",
-            publisher = "New Publisher",
-            publication_date = new DateOnly(2024, 1, 1)
+            Title = "New Book",
+            ItemType = ItemType.book,
+            CallNumber = "002.42",
+            ClassificationSystem = ClassificationSystem.dewey_decimal,
+            Location = new ItemLocationDto { Floor = 3, Section = "History", ShelfCode = "H-456" },
+            Isbn = "9780743273566",
+            Publisher = "New Publisher",
+            PublicationDate = new DateOnly(2024, 1, 1)
         };
 
         var utcNow = DateTime.UtcNow;
@@ -78,14 +74,14 @@ public class DtoMappingTests
         // Assert
         item.ShouldNotBeNull();
         item.Id.ShouldNotBe(Guid.Empty);
-        item.Title.ShouldBe(createDto.title);
-        item.ItemType.ShouldBe(createDto.item_type);
-        item.CallNumber.ShouldBe(createDto.call_number);
-        item.ClassificationSystem.ShouldBe(createDto.classification_system);
+        item.Title.ShouldBe(createDto.Title);
+        item.ItemType.ShouldBe(createDto.ItemType);
+        item.CallNumber.ShouldBe(createDto.CallNumber);
+        item.ClassificationSystem.ShouldBe(createDto.ClassificationSystem);
         item.Status.ShouldBe(ItemStatus.available); // Default status
-        item.Isbn.ShouldBe(createDto.isbn);
-        item.Publisher.ShouldBe(createDto.publisher);
-        item.PublicationDate.ShouldBe(createDto.publication_date);
+        item.Isbn.ShouldBe(createDto.Isbn);
+        item.Publisher.ShouldBe(createDto.Publisher);
+        item.PublicationDate.ShouldBe(createDto.PublicationDate);
         item.CreatedBy.ShouldBe("test-user");
         item.UpdatedBy.ShouldBe("test-user");
         
@@ -119,15 +115,15 @@ public class DtoMappingTests
 
         var updateDto = new ItemUpdateRequestDto
         {
-            title = "Updated Title",
-            item_type = ItemType.dvd,
-            call_number = "002.42",
-            classification_system = ClassificationSystem.library_of_congress,
-            location = new ItemLocationDto { floor = 2, section = "Updated", shelf_code = "U-456" },
-            status = ItemStatus.checked_out,
-            isbn = "9780743273567",
-            publisher = "Updated Publisher",
-            publication_date = new DateOnly(2025, 1, 1)
+            Title = "Updated Title",
+            ItemType = ItemType.dvd,
+            CallNumber = "002.42",
+            ClassificationSystem = ClassificationSystem.library_of_congress,
+            Location = new ItemLocationDto { Floor = 2, Section = "Updated", ShelfCode = "U-456" },
+            Status = ItemStatus.checked_out,
+            Isbn = "9780743273567",
+            Publisher = "Updated Publisher",
+            PublicationDate = new DateOnly(2025, 1, 1)
         };
 
         var utcNow = DateTime.UtcNow;
@@ -136,14 +132,14 @@ public class DtoMappingTests
         existingItem.ApplyUpdate(updateDto, utcNow, "update-user");
 
         // Assert
-        existingItem.Title.ShouldBe(updateDto.title);
-        existingItem.ItemType.ShouldBe(updateDto.item_type);
-        existingItem.CallNumber.ShouldBe(updateDto.call_number);
-        existingItem.ClassificationSystem.ShouldBe(updateDto.classification_system);
-        existingItem.Status.ShouldBe(updateDto.status);
-        existingItem.Isbn.ShouldBe(updateDto.isbn);
-        existingItem.Publisher.ShouldBe(updateDto.publisher);
-        existingItem.PublicationDate.ShouldBe(updateDto.publication_date);
+        existingItem.Title.ShouldBe(updateDto.Title);
+        existingItem.ItemType.ShouldBe(updateDto.ItemType);
+        existingItem.CallNumber.ShouldBe(updateDto.CallNumber);
+        existingItem.ClassificationSystem.ShouldBe(updateDto.ClassificationSystem);
+        existingItem.Status.ShouldBe(updateDto.Status);
+        existingItem.Isbn.ShouldBe(updateDto.Isbn);
+        existingItem.Publisher.ShouldBe(updateDto.Publisher);
+        existingItem.PublicationDate.ShouldBe(updateDto.PublicationDate);
         existingItem.UpdatedBy.ShouldBe("update-user");
         
         existingItem.Location.Floor.ShouldBe(2);
@@ -181,12 +177,12 @@ public class DtoMappingTests
 
         var patchDto = new ItemPatchRequestDto
         {
-            title = "Patched Title", // Should update
-            // item_type = null, // Should not update
-            // call_number = null, // Should not update
-            status = ItemStatus.checked_out, // Should update
-            isbn = null, // Should not update
-            location = new ItemLocationDto { floor = 2, section = "Patched", shelf_code = "P-456" } // Should update
+            Title = "Patched Title", // Should update
+            // ItemType = null, // Should not update
+            // CallNumber = null, // Should not update
+            Status = ItemStatus.checked_out, // Should update
+            Isbn = null, // Should not update
+            Location = new ItemLocationDto { Floor = 2, Section = "Patched", ShelfCode = "P-456" } // Should update
             // Other fields null - should not update
         };
 

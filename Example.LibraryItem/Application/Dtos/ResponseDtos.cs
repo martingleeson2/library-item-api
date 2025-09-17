@@ -1,28 +1,29 @@
+using System.Text.Json.Serialization;
+
 namespace Example.LibraryItem.Application.Dtos
 {
     public record ItemListResponseDto
     {
-        public required List<ItemDto> data { get; init; }
-        public required PaginationDto pagination { get; init; }
-        public Links? _links { get; init; }
+        [JsonPropertyName("data")] public required List<ItemDto> Data { get; init; }
+        [JsonPropertyName("pagination")] public required PaginationDto Pagination { get; init; }
     }
 
     public record ErrorResponseDto
     {
-        public required string error { get; init; }
-        public required string message { get; init; }
-        public string? details { get; init; }
-        public required DateTime timestamp { get; init; }
-        public required Guid request_id { get; init; }
-        public string? path { get; init; }
+        [JsonPropertyName("error")] public required string Error { get; init; }
+        [JsonPropertyName("message")] public required string Message { get; init; }
+        [JsonPropertyName("details")] public string? Details { get; init; }
+        [JsonPropertyName("timestamp")] public required DateTime Timestamp { get; init; }
+        [JsonPropertyName("request_id")] public required Guid RequestId { get; init; }
+        [JsonPropertyName("path")] public string? Path { get; init; }
     }
 
     public record ValidationErrorResponseDto
     {
-        public required string error { get; init; }
-        public required string message { get; init; }
-        public required List<ValidationError> validation_errors { get; init; }
-        public required DateTime timestamp { get; init; }
-        public required Guid request_id { get; init; }
+        [JsonPropertyName("error")] public required string Error { get; init; }
+        [JsonPropertyName("message")] public required string Message { get; init; }
+        [JsonPropertyName("validation_errors")] public required List<ValidationError> ValidationErrors { get; init; }
+        [JsonPropertyName("timestamp")] public required DateTime Timestamp { get; init; }
+        [JsonPropertyName("request_id")] public required Guid RequestId { get; init; }
     }
 }

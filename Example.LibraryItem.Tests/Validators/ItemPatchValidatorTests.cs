@@ -27,32 +27,32 @@ public class ItemPatchValidatorTests
     {
         var dto = new ItemPatchRequestDto
         {
-            title = new string('a', 501),
-            isbn = "invalid",
-            issn = "invalid",
-            publisher = new string('p', 256),
-            edition = new string('e', 51),
-            language = new string('l', 11),
-            collection = new string('c', 101),
-            barcode = new string('b', 51),
-            condition_notes = new string('n', 1001),
-            description = new string('d', 2001),
-            location = new ItemLocationDto { floor = -2, section = "", shelf_code = "" }
+            Title = new string('a', 501),
+            Isbn = "invalid",
+            Issn = "invalid",
+            Publisher = new string('p', 256),
+            Edition = new string('e', 51),
+            Language = new string('l', 11),
+            Collection = new string('c', 101),
+            Barcode = new string('b', 51),
+            ConditionNotes = new string('n', 1001),
+            Description = new string('d', 2001),
+            Location = new ItemLocationDto { Floor = -2, Section = "", ShelfCode = "" }
         };
 
-        var result = _validator.TestValidate(dto);
-        result.ShouldHaveValidationErrorFor(x => x.title);
-        result.ShouldHaveValidationErrorFor(x => x.isbn);
-        result.ShouldHaveValidationErrorFor(x => x.issn);
-        result.ShouldHaveValidationErrorFor(x => x.publisher);
-        result.ShouldHaveValidationErrorFor(x => x.edition);
-        result.ShouldHaveValidationErrorFor(x => x.language);
-        result.ShouldHaveValidationErrorFor(x => x.collection);
-        result.ShouldHaveValidationErrorFor(x => x.barcode);
-        result.ShouldHaveValidationErrorFor(x => x.condition_notes);
-        result.ShouldHaveValidationErrorFor(x => x.description);
+    var result = _validator.TestValidate(dto);
+    result.ShouldHaveValidationErrorFor(x => x.Title);
+    result.ShouldHaveValidationErrorFor(x => x.Isbn);
+    result.ShouldHaveValidationErrorFor(x => x.Issn);
+    result.ShouldHaveValidationErrorFor(x => x.Publisher);
+    result.ShouldHaveValidationErrorFor(x => x.Edition);
+    result.ShouldHaveValidationErrorFor(x => x.Language);
+    result.ShouldHaveValidationErrorFor(x => x.Collection);
+    result.ShouldHaveValidationErrorFor(x => x.Barcode);
+    result.ShouldHaveValidationErrorFor(x => x.ConditionNotes);
+    result.ShouldHaveValidationErrorFor(x => x.Description);
     // floor -2 is valid; only section/shelf_code should error
-        result.ShouldHaveValidationErrorFor("location.section");
-        result.ShouldHaveValidationErrorFor("location.shelf_code");
+            result.ShouldHaveValidationErrorFor("Location.Section");
+            result.ShouldHaveValidationErrorFor("Location.ShelfCode");
     }
 }

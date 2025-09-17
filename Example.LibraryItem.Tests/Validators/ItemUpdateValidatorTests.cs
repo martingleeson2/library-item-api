@@ -17,22 +17,22 @@ public class ItemUpdateValidatorTests
 
     private static ItemUpdateRequestDto Valid() => new()
     {
-        title = "Valid Title",
-        item_type = ItemType.book,
-        call_number = "813.52 F553g",
-        classification_system = ClassificationSystem.dewey_decimal,
-        location = new ItemLocationDto { floor = 1, section = "REF", shelf_code = "A-125" },
-        status = ItemStatus.available
+    Title = "Valid Title",
+    ItemType = ItemType.book,
+    CallNumber = "813.52 F553g",
+    ClassificationSystem = ClassificationSystem.dewey_decimal,
+    Location = new ItemLocationDto { Floor = 1, Section = "REF", ShelfCode = "A-125" },
+    Status = ItemStatus.available
     };
 
     [Test]
     public void Status_Is_Enum()
     {
-        var dto = Valid() with { status = (ItemStatus)999 };
-        _validator.TestValidate(dto).ShouldHaveValidationErrorFor(x => x.status);
+    var dto = Valid() with { Status = (ItemStatus)999 };
+    _validator.TestValidate(dto).ShouldHaveValidationErrorFor(x => x.Status);
 
-        dto = Valid() with { status = ItemStatus.available };
-        _validator.TestValidate(dto).ShouldNotHaveValidationErrorFor(x => x.status);
+    dto = Valid() with { Status = ItemStatus.available };
+    _validator.TestValidate(dto).ShouldNotHaveValidationErrorFor(x => x.Status);
     }
 
     [Test]
@@ -40,19 +40,19 @@ public class ItemUpdateValidatorTests
     {
         var dto = Valid() with
         {
-            edition = new string('e', 51),
-            language = new string('l', 11),
-            collection = new string('c', 101),
-            barcode = new string('b', 51),
-            condition_notes = new string('n', 1001),
-            description = new string('d', 2001)
+            Edition = new string('e', 51),
+            Language = new string('l', 11),
+            Collection = new string('c', 101),
+            Barcode = new string('b', 51),
+            ConditionNotes = new string('n', 1001),
+            Description = new string('d', 2001)
         };
         var result = _validator.TestValidate(dto);
-        result.ShouldHaveValidationErrorFor(x => x.edition);
-        result.ShouldHaveValidationErrorFor(x => x.language);
-        result.ShouldHaveValidationErrorFor(x => x.collection);
-        result.ShouldHaveValidationErrorFor(x => x.barcode);
-        result.ShouldHaveValidationErrorFor(x => x.condition_notes);
-        result.ShouldHaveValidationErrorFor(x => x.description);
+        result.ShouldHaveValidationErrorFor(x => x.Edition);
+        result.ShouldHaveValidationErrorFor(x => x.Language);
+        result.ShouldHaveValidationErrorFor(x => x.Collection);
+        result.ShouldHaveValidationErrorFor(x => x.Barcode);
+        result.ShouldHaveValidationErrorFor(x => x.ConditionNotes);
+        result.ShouldHaveValidationErrorFor(x => x.Description);
     }
 }

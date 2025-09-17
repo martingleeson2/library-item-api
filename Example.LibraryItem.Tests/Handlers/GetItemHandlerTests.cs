@@ -48,8 +48,8 @@ public class GetItemHandlerTests
 
         // Assert
         result.ShouldNotBeNull();
-        result.id.ShouldBe(itemId);
-        result.title.ShouldBe("Test Book");
+    result.Id.ShouldBe(itemId);
+    result.Title.ShouldBe("Test Book");
     }
 
     [Test]
