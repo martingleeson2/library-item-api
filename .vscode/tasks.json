@@ -1,0 +1,26 @@
+{
+	"$schema": "vscode://schemas/tasks",
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "test: all",
+			"type": "shell",
+			"command": "dotnet test Example.LibraryItem.Tests/Example.LibraryItem.Tests.csproj --nologo --configuration Debug --framework net8.0",
+			"group": "test",
+			"problemMatcher": []
+		},
+		{
+			"label": "test: coverage",
+			"type": "shell",
+			"command": "dotnet test Example.LibraryItem.Tests/Example.LibraryItem.Tests.csproj --nologo --configuration Debug --framework net8.0 /p:CollectCoverage=true /p:CoverletOutput=Example.LibraryItem.Tests/coverage /p:CoverletOutputFormat=opencover",
+			"group": "test",
+			"problemMatcher": []
+		},
+		{
+			"label": "test: all",
+			"type": "shell",
+			"command": "dotnet test Example.LibraryItem.Tests/Example.LibraryItem.Tests.csproj --nologo --configuration Debug --framework net8.0",
+			"group": "test"
+		}
+	]
+}

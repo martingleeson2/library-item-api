@@ -1,0 +1,81 @@
+# .NET / C#
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+[xX]64/
+[xX]86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+[Oo]ut/
+artifacts/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider / ReSharper
+.idea/
+*.sln.iml
+_ReSharper*/
+**/resharper-cache/
+
+# VS Code (keep common project files if added)
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# NuGet
+*.nupkg
+*.snupkg
+*.nuspec
+packages/
+project.lock.json
+project.fragment.lock.json
+
+# Logs
+*.log
+
+# Test results & coverage
+[Tt]est[Rr]esults/
+*.trx
+*.coverage
+*.coveragexml
+.coverage
+.coverage.*
+coverage*/
+**/coverage*/
+**/coverage*.xml
+**/coverage*.json
+
+# Database files (SQLite, etc.)
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+
+# Local configuration
+secrets.json
+appsettings.*.local.json
+
+# OS-specific
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# Tooling caches / misc
+*.pidb
+*.svclog
+*.pdb
+*.mdb
+*.orig
+*.rej
+
+# Dotnet tools cache
+.dotnet_tools/
