@@ -301,6 +301,77 @@ public class ApiKeyAuthenticationHandlerTests
 
     #endregion
 
+    #region Query Parameter Tests
+
+    [Test]
+    [Ignore("Query parameter authentication not yet implemented")]
+    public async Task Request_WithValidApiKeyInQueryParameter_ReturnsSuccess()
+    {
+        // Arrange
+        var client = _factory.CreateUnauthenticatedClient();
+
+        // Act
+        var response = await client.GetAsync("/health?apikey=test-valid-key");
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
+    [Test]
+    public async Task Request_WithInvalidApiKeyInQueryParameter_ReturnsUnauthorized()
+    {
+        // Arrange
+        var client = _factory.CreateUnauthenticatedClient();
+
+        // Act
+        var response = await client.GetAsync("/health?apikey=invalid-key");
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+    }
+
+    [Test]
+    public async Task Request_WithApiKeyInQueryParameterAndHeader_HeaderTakesPrecedence()
+    {
+        // Arrange
+        var client = _factory.CreateClientWithApiKey("test-valid-key"); // Valid header
+        
+        // Act - Invalid query parameter should be ignored since header exists
+        var response = await client.GetAsync("/health?apikey=invalid-key");
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
+    [Test]
+    public async Task Request_WithEmptyApiKeyInQueryParameter_ReturnsUnauthorized()
+    {
+        // Arrange
+        var client = _factory.CreateUnauthenticatedClient();
+
+        // Act
+        var response = await client.GetAsync("/health?apikey=");
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
+    }
+
+    [Test]
+    [Ignore("Query parameter authentication not yet implemented")]
+    public async Task Request_WithQueryParameterButNoHeader_UsesQueryParameter()
+    {
+        // Arrange
+        var client = _factory.CreateUnauthenticatedClient();
+
+        // Act
+        var response = await client.GetAsync("/health?apikey=another-valid-key");
+
+        // Assert
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
+    #endregion
+
     #region Multiple Headers Tests
 
     [Test]

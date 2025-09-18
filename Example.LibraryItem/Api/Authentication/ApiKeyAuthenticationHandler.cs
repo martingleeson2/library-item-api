@@ -146,7 +146,7 @@ namespace Example.LibraryItem.Api.Authentication
         /// </summary>
         /// <param name="apiKey">The validated API key</param>
         /// <returns>Authentication ticket containing user identity and claims</returns>
-        private AuthenticationTicket CreateAuthenticationTicket(string apiKey)
+        private static AuthenticationTicket CreateAuthenticationTicket(string apiKey)
         {
             var identity = new ClaimsIdentity(ApiKeyDefaults.Scheme);
             identity.AddClaim(new Claim(ClaimTypes.Name, "apikey-user"));

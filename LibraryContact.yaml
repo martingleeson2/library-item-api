@@ -1,0 +1,1133 @@
+openapi: 3.0.3
+info:
+  title: Library Management System API
+  description: |
+    REST API for managing library items including books, periodicals, multimedia, and other materials.
+    Supports full CRUD operations with location tracking and authentication/authorization.
+  version: 1.0.0
+  contact:
+    name: Library System Administrator
+    email: admin@library.org
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.library.org/v1
+    description: Production server
+  - url: https://staging-api.library.org/v1
+    description: Staging server
+
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /items:
+    get:
+      summary: Retrieve multiple library items
+      description: |
+        Retrieve a paginated list of library items with optional filtering and sorting.
+        Supports querying by various item parameters including title, author, ISBN, location, etc.
+      tags:
+        - Items
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: title
+          in: query
+          description: Filter by item title (partial match, case-insensitive)
+          required: false
+          schema:
+            type: string
+        - name: author
+          in: query
+          description: Filter by author name (partial match, case-insensitive)
+          required: false
+          schema:
+            type: string
+        - name: isbn
+          in: query
+          description: Filter by ISBN (exact match)
+          required: false
+          schema:
+            type: string
+        - name: item_type
+          in: query
+          description: Filter by item type
+          required: false
+          schema:
+            $ref: '#/components/schemas/ItemType'
+        - name: status
+          in: query
+          description: Filter by availability status
+          required: false
+          schema:
+            $ref: '#/components/schemas/ItemStatus'
+        - name: collection
+          in: query
+          description: Filter by collection name
+          required: false
+          schema:
+            type: string
+        - name: location_floor
+          in: query
+          description: Filter by floor number
+          required: false
+          schema:
+            type: integer
+        - name: location_section
+          in: query
+          description: Filter by section code
+          required: false
+          schema:
+            type: string
+        - name: call_number
+          in: query
+          description: Filter by call number (Dewey Decimal or Library of Congress)
+          required: false
+          schema:
+            type: string
+        - name: publication_year_from
+          in: query
+          description: Filter items published from this year onwards
+          required: false
+          schema:
+            type: integer
+            minimum: 1000
+        - name: publication_year_to
+          in: query
+          description: Filter items published up to this year
+          required: false
+          schema:
+            type: integer
+            minimum: 1000
+        - name: sort_by
+          in: query
+          description: Sort field
+          required: false
+          schema:
+            type: string
+            enum: [title, author, publication_date, call_number, created_at, updated_at]
+            default: title
+        - name: sort_order
+          in: query
+          description: Sort order
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+      responses:
+        '200':
+          description: Successfully retrieved items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemListResponse'
+        '400':
+          description: Bad request - Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - Invalid or missing authentication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Create a new library item
+      description: Add a new item to the library collection
+      tags:
+        - Items
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemCreateRequest'
+      responses:
+        '201':
+          description: Item successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+        '400':
+          description: Bad request - Invalid item data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - Invalid or missing authentication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - Insufficient permissions to create items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict - Item with same identifier already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Unprocessable Entity - Validation errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /items/{itemId}:
+    get:
+      summary: Retrieve a single library item
+      description: Get detailed information about a specific library item by its ID
+      tags:
+        - Items
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          description: Unique identifier for the library item
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successfully retrieved item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+        '400':
+          description: Bad request - Invalid item ID format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - Invalid or missing authentication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Full update of a library item
+      description: Replace all fields of an existing library item
+      tags:
+        - Items
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          description: Unique identifier for the library item
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemUpdateRequest'
+      responses:
+        '200':
+          description: Item successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+        '400':
+          description: Bad request - Invalid item ID or data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - Invalid or missing authentication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - Insufficient permissions to update items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict - Update would create duplicate identifier
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Unprocessable Entity - Validation errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    patch:
+      summary: Partial update of a library item
+      description: Update specific fields of an existing library item
+      tags:
+        - Items
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          description: Unique identifier for the library item
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemPatchRequest'
+      responses:
+        '200':
+          description: Item successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+        '400':
+          description: Bad request - Invalid item ID or data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - Invalid or missing authentication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - Insufficient permissions to update items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict - Update would create duplicate identifier
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Unprocessable Entity - Validation errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Remove a library item
+      description: |
+        Delete a library item from the collection. This is typically used for items that are 
+        damaged beyond repair, lost, or being deaccessioned from the collection.
+      tags:
+        - Items
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          description: Unique identifier for the library item
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Item successfully deleted
+        '400':
+          description: Bad request - Invalid item ID format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - Invalid or missing authentication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - Insufficient permissions to delete items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict - Cannot delete item (e.g., currently checked out)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for system integrations and automated processes
+
+  schemas:
+    ItemType:
+      type: string
+      enum:
+        - book
+        - periodical
+        - journal
+        - magazine
+        - newspaper
+        - dvd
+        - cd
+        - audiobook
+        - ebook
+        - map
+        - manuscript
+        - thesis
+        - government_document
+        - reference
+        - microfilm
+        - microform
+        - digital_resource
+      description: Type of library item
+
+    ItemStatus:
+      type: string
+      enum:
+        - available
+        - checked_out
+        - reserved
+        - in_processing
+        - damaged
+        - missing
+        - withdrawn
+        - on_hold
+        - in_transit
+        - reference_only
+      description: Current status of the item
+
+    ClassificationSystem:
+      type: string
+      enum:
+        - dewey_decimal
+        - library_of_congress
+        - sudoc
+        - local
+      description: Classification system used for organizing the item
+
+    ItemLocation:
+      type: object
+      required:
+        - floor
+        - section
+        - shelf_code
+      properties:
+        floor:
+          type: integer
+          minimum: -2
+          maximum: 20
+          description: Floor number (negative for basement levels)
+          example: 2
+        section:
+          type: string
+          maxLength: 10
+          description: Section code or area designation
+          example: "REF"
+        wing:
+          type: string
+          maxLength: 20
+          description: Wing or building section
+          example: "North Wing"
+        shelf_code:
+          type: string
+          maxLength: 20
+          description: Specific shelf or range identifier
+          example: "A-125"
+        position:
+          type: string
+          maxLength: 10
+          description: Specific position on shelf
+          example: "3"
+        notes:
+          type: string
+          maxLength: 255
+          description: Additional location notes
+          example: "Behind reference desk"
+
+    Item:
+      type: object
+      required:
+        - id
+        - title
+        - item_type
+        - call_number
+        - classification_system
+        - location
+        - status
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the item
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        title:
+          type: string
+          maxLength: 500
+          description: Title of the item
+          example: "The Great Gatsby"
+        subtitle:
+          type: string
+          maxLength: 500
+          description: Subtitle if applicable
+          example: "A Novel"
+        author:
+          type: string
+          maxLength: 255
+          description: Primary author or creator
+          example: "F. Scott Fitzgerald"
+        contributors:
+          type: array
+          items:
+            type: string
+            maxLength: 255
+          description: Additional contributors (editors, illustrators, etc.)
+          example: ["Matthew J. Bruccoli (Editor)"]
+        isbn:
+          type: string
+          pattern: '^(?:978|979)?[0-9]{9}[0-9X]$'
+          description: International Standard Book Number
+          example: "9780743273565"
+        issn:
+          type: string
+          pattern: '^[0-9]{4}-[0-9]{3}[0-9X]$'
+          description: International Standard Serial Number (for periodicals)
+          example: "1234-5678"
+        publisher:
+          type: string
+          maxLength: 255
+          description: Publisher name
+          example: "Scribner"
+        publication_date:
+          type: string
+          format: date
+          description: Publication date
+          example: "2004-09-30"
+        edition:
+          type: string
+          maxLength: 50
+          description: Edition information
+          example: "1st Edition"
+        pages:
+          type: integer
+          minimum: 1
+          description: Number of pages
+          example: 180
+        language:
+          type: string
+          maxLength: 10
+          description: Primary language (ISO 639-1 code)
+          example: "en"
+        item_type:
+          $ref: '#/components/schemas/ItemType'
+        call_number:
+          type: string
+          maxLength: 50
+          description: Classification number for shelving
+          example: "813.52 F553g"
+        classification_system:
+          $ref: '#/components/schemas/ClassificationSystem'
+        collection:
+          type: string
+          maxLength: 100
+          description: Collection or special designation
+          example: "General Collection"
+        location:
+          $ref: '#/components/schemas/ItemLocation'
+        status:
+          $ref: '#/components/schemas/ItemStatus'
+        barcode:
+          type: string
+          maxLength: 50
+          description: Physical barcode identifier
+          example: "3 1234 56789 012"
+        acquisition_date:
+          type: string
+          format: date
+          description: Date item was acquired by library
+          example: "2023-01-15"
+        cost:
+          type: number
+          format: float
+          minimum: 0
+          description: Acquisition cost in library's currency
+          example: 24.99
+        condition_notes:
+          type: string
+          maxLength: 1000
+          description: Notes about item condition
+          example: "Excellent condition, minor shelf wear"
+        description:
+          type: string
+          maxLength: 2000
+          description: Summary or description of content
+        subjects:
+          type: array
+          items:
+            type: string
+            maxLength: 100
+          description: Subject headings or tags
+          example: ["American Literature", "Jazz Age", "Fiction"]
+        digital_url:
+          type: string
+          format: uri
+          description: URL for digital access (if applicable)
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when record was created
+          example: "2023-01-15T10:30:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: Timestamp when record was last updated
+          example: "2023-01-16T14:20:00Z"
+        created_by:
+          type: string
+          maxLength: 100
+          description: User who created the record
+          example: "librarian@library.org"
+        updated_by:
+          type: string
+          maxLength: 100
+          description: User who last updated the record
+          example: "librarian@library.org"
+
+    ItemCreateRequest:
+      type: object
+      required:
+        - title
+        - item_type
+        - call_number
+        - classification_system
+        - location
+      properties:
+        title:
+          type: string
+          maxLength: 500
+          description: Title of the item
+        subtitle:
+          type: string
+          maxLength: 500
+          description: Subtitle if applicable
+        author:
+          type: string
+          maxLength: 255
+          description: Primary author or creator
+        contributors:
+          type: array
+          items:
+            type: string
+            maxLength: 255
+          description: Additional contributors
+        isbn:
+          type: string
+          pattern: '^(?:978|979)?[0-9]{9}[0-9X]$'
+          description: International Standard Book Number
+        issn:
+          type: string
+          pattern: '^[0-9]{4}-[0-9]{3}[0-9X]$'
+          description: International Standard Serial Number
+        publisher:
+          type: string
+          maxLength: 255
+          description: Publisher name
+        publication_date:
+          type: string
+          format: date
+          description: Publication date
+        edition:
+          type: string
+          maxLength: 50
+          description: Edition information
+        pages:
+          type: integer
+          minimum: 1
+          description: Number of pages
+        language:
+          type: string
+          maxLength: 10
+          description: Primary language (ISO 639-1 code)
+        item_type:
+          $ref: '#/components/schemas/ItemType'
+        call_number:
+          type: string
+          maxLength: 50
+          description: Classification number for shelving
+        classification_system:
+          $ref: '#/components/schemas/ClassificationSystem'
+        collection:
+          type: string
+          maxLength: 100
+          description: Collection or special designation
+        location:
+          $ref: '#/components/schemas/ItemLocation'
+        status:
+          $ref: '#/components/schemas/ItemStatus'
+        barcode:
+          type: string
+          maxLength: 50
+          description: Physical barcode identifier
+        acquisition_date:
+          type: string
+          format: date
+          description: Date item was acquired by library
+        cost:
+          type: number
+          format: float
+          minimum: 0
+          description: Acquisition cost
+        condition_notes:
+          type: string
+          maxLength: 1000
+          description: Notes about item condition
+        description:
+          type: string
+          maxLength: 2000
+          description: Summary or description of content
+        subjects:
+          type: array
+          items:
+            type: string
+            maxLength: 100
+          description: Subject headings or tags
+        digital_url:
+          type: string
+          format: uri
+          description: URL for digital access
+
+    ItemUpdateRequest:
+      type: object
+      required:
+        - title
+        - item_type
+        - call_number
+        - classification_system
+        - location
+        - status
+      properties:
+        title:
+          type: string
+          maxLength: 500
+          description: Title of the item
+        subtitle:
+          type: string
+          maxLength: 500
+          description: Subtitle if applicable
+        author:
+          type: string
+          maxLength: 255
+          description: Primary author or creator
+        contributors:
+          type: array
+          items:
+            type: string
+            maxLength: 255
+          description: Additional contributors
+        isbn:
+          type: string
+          pattern: '^(?:978|979)?[0-9]{9}[0-9X]$'
+          description: International Standard Book Number
+        issn:
+          type: string
+          pattern: '^[0-9]{4}-[0-9]{3}[0-9X]$'
+          description: International Standard Serial Number
+        publisher:
+          type: string
+          maxLength: 255
+          description: Publisher name
+        publication_date:
+          type: string
+          format: date
+          description: Publication date
+        edition:
+          type: string
+          maxLength: 50
+          description: Edition information
+        pages:
+          type: integer
+          minimum: 1
+          description: Number of pages
+        language:
+          type: string
+          maxLength: 10
+          description: Primary language (ISO 639-1 code)
+        item_type:
+          $ref: '#/components/schemas/ItemType'
+        call_number:
+          type: string
+          maxLength: 50
+          description: Classification number for shelving
+        classification_system:
+          $ref: '#/components/schemas/ClassificationSystem'
+        collection:
+          type: string
+          maxLength: 100
+          description: Collection or special designation
+        location:
+          $ref: '#/components/schemas/ItemLocation'
+        status:
+          $ref: '#/components/schemas/ItemStatus'
+        barcode:
+          type: string
+          maxLength: 50
+          description: Physical barcode identifier
+        acquisition_date:
+          type: string
+          format: date
+          description: Date item was acquired by library
+        cost:
+          type: number
+          format: float
+          minimum: 0
+          description: Acquisition cost
+        condition_notes:
+          type: string
+          maxLength: 1000
+          description: Notes about item condition
+        description:
+          type: string
+          maxLength: 2000
+          description: Summary or description of content
+        subjects:
+          type: array
+          items:
+            type: string
+            maxLength: 100
+          description: Subject headings or tags
+        digital_url:
+          type: string
+          format: uri
+          description: URL for digital access
+
+    ItemPatchRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 500
+          description: Title of the item
+        subtitle:
+          type: string
+          maxLength: 500
+          description: Subtitle if applicable
+        author:
+          type: string
+          maxLength: 255
+          description: Primary author or creator
+        contributors:
+          type: array
+          items:
+            type: string
+            maxLength: 255
+          description: Additional contributors
+        isbn:
+          type: string
+          pattern: '^(?:978|979)?[0-9]{9}[0-9X]$'
+          description: International Standard Book Number
+        issn:
+          type: string
+          pattern: '^[0-9]{4}-[0-9]{3}[0-9X]$'
+          description: International Standard Serial Number
+        publisher:
+          type: string
+          maxLength: 255
+          description: Publisher name
+        publication_date:
+          type: string
+          format: date
+          description: Publication date
+        edition:
+          type: string
+          maxLength: 50
+          description: Edition information
+        pages:
+          type: integer
+          minimum: 1
+          description: Number of pages
+        language:
+          type: string
+          maxLength: 10
+          description: Primary language (ISO 639-1 code)
+        item_type:
+          $ref: '#/components/schemas/ItemType'
+        call_number:
+          type: string
+          maxLength: 50
+          description: Classification number for shelving
+        classification_system:
+          $ref: '#/components/schemas/ClassificationSystem'
+        collection:
+          type: string
+          maxLength: 100
+          description: Collection or special designation
+        location:
+          $ref: '#/components/schemas/ItemLocation'
+        status:
+          $ref: '#/components/schemas/ItemStatus'
+        barcode:
+          type: string
+          maxLength: 50
+          description: Physical barcode identifier
+        acquisition_date:
+          type: string
+          format: date
+          description: Date item was acquired by library
+        cost:
+          type: number
+          format: float
+          minimum: 0
+          description: Acquisition cost
+        condition_notes:
+          type: string
+          maxLength: 1000
+          description: Notes about item condition
+        description:
+          type: string
+          maxLength: 2000
+          description: Summary or description of content
+        subjects:
+          type: array
+          items:
+            type: string
+            maxLength: 100
+          description: Subject headings or tags
+        digital_url:
+          type: string
+          format: uri
+          description: URL for digital access
+
+    ItemResponse:
+      $ref: '#/components/schemas/Item'
+
+    ItemListResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItemResponse'
+        pagination:
+          type: object
+          required:
+            - page
+            - limit
+            - total_items
+            - total_pages
+            - has_next
+            - has_previous
+          properties:
+            page:
+              type: integer
+              description: Current page number
+              example: 1
+            limit:
+              type: integer
+              description: Items per page
+              example: 20
+            total_items:
+              type: integer
+              description: Total number of items matching the query
+              example: 150
+            total_pages:
+              type: integer
+              description: Total number of pages
+              example: 8
+            has_next:
+              type: boolean
+              description: Whether there are more pages
+              example: true
+            has_previous:
+              type: boolean
+              description: Whether there are previous pages
+              example: false
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+        - timestamp
+        - request_id
+      properties:
+        error:
+          type: string
+          description: Error code or type
+          example: "ITEM_NOT_FOUND"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "The requested library item could not be found"
+        details:
+          type: string
+          description: Additional error details
+          example: "No item exists with ID: 550e8400-e29b-41d4-a716-446655440000"
+        timestamp:
+          type: string
+          format: date-time
+          description: When the error occurred
+          example: "2023-01-16T14:20:00Z"
+        request_id:
+          type: string
+          format: uuid
+          description: Unique identifier for this request
+          example: "req_123e4567-e89b-12d3-a456-426614174000"
+        path:
+          type: string
+          description: API endpoint that generated the error
+          example: "/v1/items/550e8400-e29b-41d4-a716-446655440000"
+
+    ValidationErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+        - validation_errors
+        - timestamp
+        - request_id
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          description: General validation error message
+          example: "The request contains validation errors"
+        validation_errors:
+          type: array
+          items:
+            type: object
+            required:
+              - field
+              - message

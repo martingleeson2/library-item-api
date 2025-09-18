@@ -9,14 +9,28 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Example.LibraryItem.Api
 {
+    /// <summary>
+    /// Defines minimal API endpoints for library item management operations.
+    /// Provides RESTful HTTP endpoints for CRUD operations with proper authentication,
+    /// validation, error handling, and OpenAPI documentation.
+    /// </summary>
     public static class Endpoints
     {
+        /// <summary>
+        /// Maps all library item endpoints to the provided route builder.
+        /// Creates a versioned API group (/v1/items) with authentication requirements
+        /// and comprehensive OpenAPI documentation for each endpoint.
+        /// </summary>
+        /// <param name="endpoints">The endpoint route builder to configure</param>
+        /// <returns>The configured endpoint route builder for method chaining</returns>
         public static IEndpointRouteBuilder MapItemEndpoints(this IEndpointRouteBuilder endpoints)
         {
             var group = endpoints.MapGroup("/v1/items")
                 .WithTags("Items")
                 .RequireAuthorization();
 
+            // GET /v1/items - Retrieve paginated list of library items
+            // Supports filtering, sorting, and pagination through query parameters
             group.MapGet("", async (
                 HttpContext http,
                 [AsParameters] ListItemsQuery query,
@@ -39,6 +53,8 @@ namespace Example.LibraryItem.Api
             .Produces<ErrorResponseDto>(StatusCodes.Status403Forbidden)
             .Produces<ErrorResponseDto>(StatusCodes.Status500InternalServerError);
 
+            // GET /v1/items/{itemId} - Retrieve a specific library item by ID
+            // Returns 404 if item doesn't exist, 200 with item data if found
             group.MapGet("/{itemId:guid}", async (
                 HttpContext http,
                 Guid itemId,
@@ -58,6 +74,8 @@ namespace Example.LibraryItem.Api
             .Produces<ErrorResponseDto>(StatusCodes.Status404NotFound)
             .Produces<ErrorResponseDto>(StatusCodes.Status500InternalServerError);
 
+            // POST /v1/items - Create a new library item
+            // Validates request data, ensures ISBN uniqueness, and returns created item with 201 status
             group.MapPost("/", async (
                 HttpContext http,
                 ItemCreateRequestDto dto,
@@ -79,6 +97,8 @@ namespace Example.LibraryItem.Api
             .Produces<ErrorResponseDto>(StatusCodes.Status409Conflict)
             .Produces<ErrorResponseDto>(StatusCodes.Status500InternalServerError);
 
+            // PUT /v1/items/{itemId} - Replace an existing library item completely
+            // Validates request data, ensures ISBN uniqueness, returns 404 if item doesn't exist
             group.MapPut("/{itemId:guid}", async (
                 HttpContext http,
                 Guid itemId,
@@ -104,6 +124,8 @@ namespace Example.LibraryItem.Api
             .Produces<ErrorResponseDto>(StatusCodes.Status409Conflict)
             .Produces<ErrorResponseDto>(StatusCodes.Status500InternalServerError);
 
+            // PATCH /v1/items/{itemId} - Partially update an existing library item
+            // Only updates provided fields, validates changes, returns 404 if item doesn't exist
             group.MapPatch("/{itemId:guid}", async (
                 HttpContext http,
                 Guid itemId,
@@ -129,6 +151,8 @@ namespace Example.LibraryItem.Api
             .Produces<ErrorResponseDto>(StatusCodes.Status409Conflict)
             .Produces<ErrorResponseDto>(StatusCodes.Status500InternalServerError);
 
+            // DELETE /v1/items/{itemId} - Remove a library item
+            // Returns 204 No Content on success, 404 if item doesn't exist
             group.MapDelete("/{itemId:guid}", async (
                 HttpContext http,
                 Guid itemId,
