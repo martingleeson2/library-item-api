@@ -190,4 +190,142 @@ public class UpdateItemHandlerTests
         result.Title.ShouldBe("Updated Title");
         result.Isbn.ShouldBe("9780743273565");
     }
+
+    [Test]
+    public async Task Skips_Isbn_Validation_When_Null_Or_Empty()
+    {
+        using var db = TestHelpers.CreateInMemoryDb();
+        var itemId = Guid.NewGuid();
+        var originalItem = new Item
+        {
+            Id = itemId,
+            Title = "Original Title",
+            ItemType = ItemType.book,
+            CallNumber = "001.42",
+            ClassificationSystem = ClassificationSystem.dewey_decimal,
+            Location = new ItemLocation(1, "A", "B"),
+            Status = ItemStatus.available,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+        db.Items.Add(originalItem);
+        await db.SaveChangesAsync();
+
+        var handler = CreateHandler(db);
+        
+        // Test with null ISBN
+        var updateRequest1 = new ItemUpdateRequestDto
+        {
+            Title = "Updated Title 1",
+            ItemType = ItemType.book,
+            CallNumber = "001.42",
+            ClassificationSystem = ClassificationSystem.dewey_decimal,
+            Location = new ItemLocationDto { Floor = 1, Section = "A", ShelfCode = "B" },
+            Status = ItemStatus.available,
+            Isbn = null
+        };
+        var result1 = await handler.HandleAsync(itemId, updateRequest1, "http://localhost", "test-user");
+        result1.ShouldNotBeNull();
+        result1!.Title.ShouldBe("Updated Title 1");
+        
+        // Test with empty ISBN
+        var updateRequest2 = new ItemUpdateRequestDto
+        {
+            Title = "Updated Title 2",
+            ItemType = ItemType.book,
+            CallNumber = "001.42",
+            ClassificationSystem = ClassificationSystem.dewey_decimal,
+            Location = new ItemLocationDto { Floor = 1, Section = "A", ShelfCode = "B" },
+            Status = ItemStatus.available,
+            Isbn = ""
+        };
+        var result2 = await handler.HandleAsync(itemId, updateRequest2, "http://localhost", "test-user");
+        result2.ShouldNotBeNull();
+        result2!.Title.ShouldBe("Updated Title 2");
+    }
+
+    [Test]
+    public async Task Uses_Provided_User_When_Specified()
+    {
+        using var db = TestHelpers.CreateInMemoryDb();
+        var itemId = Guid.NewGuid();
+        var originalItem = new Item
+        {
+            Id = itemId,
+            Title = "Original Title",
+            ItemType = ItemType.book,
+            CallNumber = "001.42",
+            ClassificationSystem = ClassificationSystem.dewey_decimal,
+            Location = new ItemLocation(1, "A", "B"),
+            Status = ItemStatus.available,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            UpdatedBy = "original-user"
+        };
+        db.Items.Add(originalItem);
+        await db.SaveChangesAsync();
+
+        var handler = CreateHandler(db);
+        var updateRequest = new ItemUpdateRequestDto
+        {
+            Title = "Updated Title",
+            ItemType = ItemType.book,
+            CallNumber = "001.42",
+            ClassificationSystem = ClassificationSystem.dewey_decimal,
+            Location = new ItemLocationDto { Floor = 1, Section = "A", ShelfCode = "B" },
+            Status = ItemStatus.available
+        };
+
+        var result = await handler.HandleAsync(itemId, updateRequest, "http://localhost", "explicit-user");
+        result.ShouldNotBeNull();
+
+        // Check that the entity was updated with the explicit user
+        var entity = await db.Items.FindAsync(itemId);
+        entity.ShouldNotBeNull();
+        entity!.UpdatedBy.ShouldBe("explicit-user");
+    }
+
+    [Test]
+    public async Task FallsBackToUserContext_WhenUserParameterIsNull()
+    {
+        // Test the branch: var currentUser = user ?? userContext.CurrentUser;
+        using var db = TestHelpers.CreateInMemoryDb();
+        var itemId = Guid.NewGuid();
+        var originalItem = new Item
+        {
+            Id = itemId,
+            Title = "Original Title",
+            ItemType = ItemType.book,
+            CallNumber = "001.42",
+            ClassificationSystem = ClassificationSystem.dewey_decimal,
+            Location = new ItemLocation(1, "A", "B"),
+            Status = ItemStatus.available,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+        
+        db.Items.Add(originalItem);
+        await db.SaveChangesAsync();
+
+        var handler = CreateHandler(db);
+        var updateRequest = new ItemUpdateRequestDto
+        {
+            Title = "Updated with Fallback User",
+            ItemType = ItemType.book,
+            CallNumber = "001.42",
+            ClassificationSystem = ClassificationSystem.dewey_decimal,
+            Location = new ItemLocationDto { Floor = 1, Section = "A", ShelfCode = "B" },
+            Status = ItemStatus.available
+        };
+
+        // Pass null as user parameter to trigger fallback to userContext.CurrentUser
+        var result = await handler.HandleAsync(itemId, updateRequest, "http://localhost", user: null);
+        result.ShouldNotBeNull();
+
+        // Verify the item was updated with the fallback user from context
+        var updatedEntity = await db.Items.FindAsync(itemId);
+        updatedEntity.ShouldNotBeNull();
+        updatedEntity!.UpdatedBy.ShouldBe("test-user"); // From mock user context
+        updatedEntity.Title.ShouldBe("Updated with Fallback User");
+    }
 }

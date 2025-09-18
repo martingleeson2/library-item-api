@@ -120,4 +120,29 @@ public class CreateItemHandlerTests
         createdItem.CreatedBy.ShouldBe("explicit-user");
         createdItem.UpdatedBy.ShouldBe("explicit-user");
     }
+
+    [Test]
+    public async Task FallsBackToUserContext_WhenUserParameterIsNull()
+    {
+        // Test the branch: var currentUser = user ?? userContext.CurrentUser;
+        using var db = TestHelpers.CreateInMemoryDb();
+        var handler = CreateHandler(db);
+        var dto = new ItemCreateRequestDto
+        {
+            Title = "Test Fallback",
+            ItemType = ItemType.book,
+            CallNumber = "TEST123",
+            ClassificationSystem = ClassificationSystem.dewey_decimal,
+            Location = new ItemLocationDto { Floor = 1, Section = "TEST", ShelfCode = "T-001" }
+        };
+        
+        // Pass null as user parameter to trigger fallback to userContext.CurrentUser
+        var result = await handler.HandleAsync(dto, "http://localhost", user: null);
+        result.ShouldNotBeNull();
+        
+        // Verify the item was created with the fallback user from context
+        var createdItem = await db.Items.FirstAsync();
+        createdItem.CreatedBy.ShouldBe("test-user"); // From mock user context
+        createdItem.UpdatedBy.ShouldBe("test-user");
+    }
 }

@@ -342,4 +342,57 @@ public class ListItemsHandlerBranchTests
         }
         finally { db.Dispose(); }
     }
+
+    [Test]
+    public async Task Filters_By_Author_With_Null_Author_Items()
+    {
+        var (db, handler) = Create();
+        try
+        {
+            // Add items with and without authors to test the null check branch
+            db.Items.AddRange(new[]
+            {
+                new Item { Id = Guid.NewGuid(), Title = "WithAuthor", Author = "TestAuthor", ItemType = ItemType.book, CallNumber = "001", ClassificationSystem = ClassificationSystem.dewey_decimal, Status = ItemStatus.available, Location = new ItemLocation(1, "A", "B"), CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
+                new Item { Id = Guid.NewGuid(), Title = "NoAuthor", Author = null, ItemType = ItemType.book, CallNumber = "002", ClassificationSystem = ClassificationSystem.dewey_decimal, Status = ItemStatus.available, Location = new ItemLocation(1, "A", "B"), CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow }
+            });
+            db.SaveChanges();
+
+            // Filter by author should only return items where Author is not null AND contains the search term
+            var query = new ListItemsQuery(1, 10, null, "Test", null, null, null, null, null, null, null, null, null, null, null);
+            var result = await handler.HandleAsync(query, default);
+            
+            result.Data.Count.ShouldBe(1);
+            result.Data[0].Title.ShouldBe("WithAuthor");
+            result.Data[0].Author.ShouldBe("TestAuthor");
+        }
+        finally { db.Dispose(); }
+    }
+
+    [Test]
+    public async Task Filters_By_PublicationYear_With_Null_PublicationDate_Items()
+    {
+        var (db, handler) = Create();
+        try
+        {
+            // Add items with and without publication dates to test the null check branches
+            db.Items.AddRange(new[]
+            {
+                new Item { Id = Guid.NewGuid(), Title = "WithDate", PublicationDate = new DateOnly(2020, 1, 1), ItemType = ItemType.book, CallNumber = "001", ClassificationSystem = ClassificationSystem.dewey_decimal, Status = ItemStatus.available, Location = new ItemLocation(1, "A", "B"), CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow },
+                new Item { Id = Guid.NewGuid(), Title = "NoDate", PublicationDate = null, ItemType = ItemType.book, CallNumber = "002", ClassificationSystem = ClassificationSystem.dewey_decimal, Status = ItemStatus.available, Location = new ItemLocation(1, "A", "B"), CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow }
+            });
+            db.SaveChanges();
+
+            // Filter by publication year range - should only return items where PublicationDate is not null
+            var queryFrom = new ListItemsQuery(1, 10, null, null, null, null, null, null, null, null, null, 2019, null, null, null);
+            var resultFrom = await handler.HandleAsync(queryFrom, default);
+            resultFrom.Data.Count.ShouldBe(1);
+            resultFrom.Data[0].Title.ShouldBe("WithDate");
+
+            var queryTo = new ListItemsQuery(1, 10, null, null, null, null, null, null, null, null, null, null, 2021, null, null);
+            var resultTo = await handler.HandleAsync(queryTo, default);
+            resultTo.Data.Count.ShouldBe(1);
+            resultTo.Data[0].Title.ShouldBe("WithDate");
+        }
+        finally { db.Dispose(); }
+    }
 }

@@ -271,7 +271,7 @@ public class DtoMappingTests
             ItemType = ItemType.dvd,
             CallNumber = "002.42",
             ClassificationSystem = ClassificationSystem.library_of_congress,
-            Location = existingItem.Location.ToDto(),
+            Location = null, // Should not update location
             Status = ItemStatus.available,
             Contributors = null, // Should default to empty list
             Subjects = null // Should default to empty list

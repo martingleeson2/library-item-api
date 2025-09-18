@@ -143,4 +143,72 @@ public class ListItemsQueryValidatorTests
         var result = _validator.TestValidate(query);
         result.ShouldNotHaveAnyValidationErrors();
     }
+
+    [Test]
+    public void PublicationYearRange_Should_Be_Valid_When_Both_Provided()
+    {
+        // Test invalid range - from > to
+        var query = new ListItemsQuery(1, 10, null, null, null, null, null, null, null, null, null, 2023, 2020, null, null);
+        var result = _validator.TestValidate(query);
+        result.ShouldHaveValidationErrorFor(x => x);
+
+        // Test valid range - from <= to
+        query = query with { PublicationYearFrom = 2020, PublicationYearTo = 2023 };
+        result = _validator.TestValidate(query);
+        result.ShouldNotHaveValidationErrorFor(x => x);
+
+        // Test equal values - should be valid
+        query = query with { PublicationYearFrom = 2020, PublicationYearTo = 2020 };
+        result = _validator.TestValidate(query);
+        result.ShouldNotHaveValidationErrorFor(x => x);
+    }
+
+    [Test]
+    public void SortBy_Skips_Validation_When_Null_Or_Empty()
+    {
+        // Test null SortBy - should not validate
+        var query = new ListItemsQuery(1, 10, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        var result = _validator.TestValidate(query);
+        result.ShouldNotHaveValidationErrorFor(x => x.SortBy);
+
+        // Test empty SortBy - should not validate
+        query = query with { SortBy = "" };
+        result = _validator.TestValidate(query);
+        result.ShouldNotHaveValidationErrorFor(x => x.SortBy);
+
+        // Test whitespace SortBy - should validate and fail
+        query = query with { SortBy = "   " };
+        result = _validator.TestValidate(query);
+        result.ShouldHaveValidationErrorFor(x => x.SortBy);
+    }
+
+    [Test]
+    public void SortOrder_Skips_Validation_When_Null_Or_Empty()
+    {
+        // Test null SortOrder - should not validate
+        var query = new ListItemsQuery(1, 10, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        var result = _validator.TestValidate(query);
+        result.ShouldNotHaveValidationErrorFor(x => x.SortOrder);
+
+        // Test empty SortOrder - should not validate  
+        query = query with { SortOrder = "" };
+        result = _validator.TestValidate(query);
+        result.ShouldNotHaveValidationErrorFor(x => x.SortOrder);
+
+        // Test whitespace SortOrder - should validate and fail
+        query = query with { SortOrder = "   " };
+        result = _validator.TestValidate(query);
+        result.ShouldHaveValidationErrorFor(x => x.SortOrder);
+    }
+
+    [Test]
+    public void PublicationYear_Fields_Skip_Validation_When_Null()
+    {
+        // Test with null values - should not validate year ranges
+        var query = new ListItemsQuery(1, 10, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        var result = _validator.TestValidate(query);
+        result.ShouldNotHaveValidationErrorFor(x => x.PublicationYearFrom);
+        result.ShouldNotHaveValidationErrorFor(x => x.PublicationYearTo);
+        result.ShouldNotHaveValidationErrorFor(x => x); // Range validation should also be skipped
+    }
 }

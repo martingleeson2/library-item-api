@@ -31,4 +31,42 @@ public class DeleteItemHandlerTests
         var ex = await Should.ThrowAsync<InvalidOperationException>(async () => await handler.HandleAsync(id));
         ex.Message.ShouldBe("CANNOT_DELETE_CHECKED_OUT");
     }
+
+    [Test]
+    public async Task Deleting_NonExistent_Item_Returns_False()
+    {
+        using var db = CreateDb();
+        var handler = new DeleteItemHandler(db, NullLogger<DeleteItemHandler>.Instance);
+        
+        var result = await handler.HandleAsync(Guid.NewGuid());
+        
+        result.ShouldBeFalse();
+    }
+
+    [Test]
+    public async Task Deleting_Available_Item_Returns_True()
+    {
+        using var db = CreateDb();
+        var id = Guid.NewGuid();
+        db.Items.Add(new Item 
+        { 
+            Id = id, 
+            Title = "Test Item", 
+            ItemType = ItemType.book, 
+            CallNumber = "123.45", 
+            ClassificationSystem = ClassificationSystem.dewey_decimal, 
+            Location = new ItemLocation(1, "A", "B"), 
+            Status = ItemStatus.available, 
+            CreatedAt = DateTime.UtcNow, 
+            UpdatedAt = DateTime.UtcNow 
+        });
+        await db.SaveChangesAsync();
+        
+        var handler = new DeleteItemHandler(db, NullLogger<DeleteItemHandler>.Instance);
+        
+        var result = await handler.HandleAsync(id);
+        
+        result.ShouldBeTrue();
+        (await db.Items.CountAsync()).ShouldBe(0);
+    }
 }

@@ -2,6 +2,7 @@ using Example.LibraryItem.Api.Services;
 using Example.LibraryItem.Application.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Moq;
+using System.Security.Claims;
 
 namespace Example.LibraryItem.Tests.Api.Services;
 
@@ -81,5 +82,39 @@ public class EndpointHelpersTests
 
         _dateTimeProviderMock.Verify(p => p.UtcNow, Times.Once);
         _dateTimeProviderMock.VerifyNoOtherCalls();
+    }
+
+    /// <summary>
+    /// Ensures GetCurrentUser returns the user name when identity is authenticated.
+    /// </summary>
+    [Test]
+    public void GetCurrentUser_WithAuthenticatedUser_ReturnsUserName()
+    {
+        // Arrange
+        var claimsIdentity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "test-user") }, "test");
+        var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+        _httpContext.User = claimsPrincipal;
+
+        // Act
+        var result = _helpers.GetCurrentUser(_httpContext);
+
+        // Assert
+        result.ShouldBe("test-user");
+    }
+
+    /// <summary>
+    /// Ensures GetCurrentUser returns null when user identity is null.
+    /// </summary>
+    [Test]
+    public void GetCurrentUser_WithNullIdentity_ReturnsNull()
+    {
+        // Arrange
+        _httpContext.User = new ClaimsPrincipal(); // No identity
+
+        // Act
+        var result = _helpers.GetCurrentUser(_httpContext);
+
+        // Assert
+        result.ShouldBeNull();
     }
 }

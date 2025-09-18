@@ -116,4 +116,96 @@ public class PatchItemHandlerBranchTests
         result.Author.ShouldBe("Auth");
         result.Contributors.ShouldBe(new List<string> { "C1", "C2" });
     }
+
+    [Test]
+    public async Task Skips_Isbn_Validation_When_Null_Or_Empty()
+    {
+        using var db = TestHelpers.CreateInMemoryDb();
+        var id = Guid.NewGuid();
+        db.Items.Add(new Item
+        {
+            Id = id,
+            Title = "Test Item",
+            ItemType = ItemType.book,
+            CallNumber = "001",
+            ClassificationSystem = ClassificationSystem.dewey_decimal,
+            Location = new ItemLocation(1, "A", "B"),
+            Status = ItemStatus.available,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        });
+        await db.SaveChangesAsync();
+
+        var handler = CreateHandler(db);
+        
+        // Test with null ISBN
+        var dto1 = new ItemPatchRequestDto { Title = "Updated", Isbn = null };
+        var result1 = await handler.HandleAsync(id, dto1, "", null);
+        result1.ShouldNotBeNull();
+        
+        // Test with empty ISBN
+        var dto2 = new ItemPatchRequestDto { Title = "Updated Again", Isbn = "" };
+        var result2 = await handler.HandleAsync(id, dto2, "", null);
+        result2.ShouldNotBeNull();
+        result2!.Title.ShouldBe("Updated Again");
+    }
+
+    [Test]
+    public async Task Validates_Isbn_When_Provided()
+    {
+        using var db = TestHelpers.CreateInMemoryDb();
+        var id = Guid.NewGuid();
+        db.Items.Add(new Item
+        {
+            Id = id,
+            Title = "Test Item",
+            ItemType = ItemType.book,
+            CallNumber = "001",
+            ClassificationSystem = ClassificationSystem.dewey_decimal,
+            Location = new ItemLocation(1, "A", "B"),
+            Status = ItemStatus.available,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        });
+        await db.SaveChangesAsync();
+
+        var handler = CreateHandler(db);
+        var dto = new ItemPatchRequestDto { Isbn = "9780743273565" };
+        var result = await handler.HandleAsync(id, dto, "", null);
+        
+        result.ShouldNotBeNull();
+        result!.Isbn.ShouldBe("9780743273565");
+    }
+
+    [Test]
+    public async Task Uses_Provided_User_When_Specified()
+    {
+        using var db = TestHelpers.CreateInMemoryDb();
+        var id = Guid.NewGuid();
+        db.Items.Add(new Item
+        {
+            Id = id,
+            Title = "Test Item",
+            ItemType = ItemType.book,
+            CallNumber = "001",
+            ClassificationSystem = ClassificationSystem.dewey_decimal,
+            Location = new ItemLocation(1, "A", "B"),
+            Status = ItemStatus.available,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            UpdatedBy = "original-user"
+        });
+        await db.SaveChangesAsync();
+
+        var handler = CreateHandler(db);
+        var dto = new ItemPatchRequestDto { Title = "Updated Title" };
+        var result = await handler.HandleAsync(id, dto, "", "explicit-user");
+        
+        result.ShouldNotBeNull();
+        
+        // Check that the entity was updated with the explicit user
+        var entity = await db.Items.FindAsync(id);
+        entity.ShouldNotBeNull();
+        entity!.UpdatedBy.ShouldBe("explicit-user");
+    }
 }

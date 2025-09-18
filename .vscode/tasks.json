@@ -14,21 +14,31 @@
 			"type": "shell",
 			"command": "dotnet tool install dotnet-reportgenerator-globaltool --tool-path ./.dotnet-tools",
 			"group": "build",
-			"problemMatcher": []
+			"problemMatcher": [],
+			"options": {
+				"env": {
+					"PATH": "${env:HOME}/.dotnet:${env:HOME}/.dotnet/tools:/usr/local/share/dotnet:${env:PATH}"
+				}
+			}
 		},
 		{
 			"label": "report: html",
 			"type": "shell",
-			"command": "./.dotnet-tools/reportgenerator -reports:Example.LibraryItem.Tests/Example.LibraryItem.Tests/coverage.opencover.xml -targetdir:coverage-report -reporttypes:Html",
+			"command": "./.dotnet-tools/reportgenerator -reports:Example.LibraryItem.Tests/coverage.opencover.xml -reports:Example.LibraryItem.Tests/Example.LibraryItem.Tests/coverage.opencover.xml -targetdir:coverage-report -reporttypes:Html",
 			"group": "build",
 			"problemMatcher": []
 		},
 		{
 			"label": "report: generate once",
 			"type": "shell",
-			"command": "dotnet tool install dotnet-reportgenerator-globaltool --tool-path ./.dotnet-tools && ./.dotnet-tools/reportgenerator -reports:Example.LibraryItem.Tests/Example.LibraryItem.Tests/coverage.opencover.xml -targetdir:coverage-report -reporttypes:Html",
+			"command": "(command -v dotnet >/dev/null 2>&1 || export PATH=\"${HOME}/.dotnet:${HOME}/.dotnet/tools:/usr/local/share/dotnet:${PATH}\") && (dotnet tool update dotnet-reportgenerator-globaltool --tool-path ./.dotnet-tools || dotnet tool install dotnet-reportgenerator-globaltool --tool-path ./.dotnet-tools || true) && ./.dotnet-tools/reportgenerator -reports:Example.LibraryItem.Tests/coverage.opencover.xml -reports:Example.LibraryItem.Tests/Example.LibraryItem.Tests/coverage.opencover.xml -targetdir:coverage-report -reporttypes:Html",
 			"isBackground": false,
-			"group": "build"
+			"group": "build",
+			"options": {
+				"env": {
+					"PATH": "${env:HOME}/.dotnet:${env:HOME}/.dotnet/tools:/usr/local/share/dotnet:${env:PATH}"
+				}
+			}
 		}
 	]
 }
