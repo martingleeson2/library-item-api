@@ -79,3 +79,6 @@ ehthumbs.db
 
 # Dotnet tools cache
 .dotnet_tools/
+
+# Claude IDE
+.claude

@@ -6,6 +6,5 @@ namespace Example.LibraryItem.Api.Authentication
     {
         public const string Scheme = "ApiKey";
         public const string HeaderName = "X-API-Key";
-        public const string OptionsSection = "Authentication";
     }
 }

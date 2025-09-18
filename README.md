@@ -2,12 +2,38 @@
 
 One-stop CRUD and query API for library items with API-key auth, rigorous validation, predictable error handling, and clean CQRS.
 
-## Badges
+## Table of Contents
 
-![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)
-![Build](https://img.shields.io/badge/build-GitHub_Actions-blue)
-![Coverage](https://img.shields.io/badge/coverage-Coverlet_opencover-brightgreen)
-![License](https://img.shields.io/badge/license-MIT-lightgrey)
+- [Features](#features)
+- [Architecture Overview](#architecture-overview)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Restore, Build, Run](#restore-build-run)
+  - [Run with Watch](#run-with-watch)
+- [Configuration](#configuration)
+  - [Development Configuration](#development-configuration)
+  - [Production Configuration](#production-configuration)
+  - [Development Seed Data](#development-seed-data)
+  - [Database Providers](#database-providers)
+- [Authentication](#authentication)
+  - [Configuration](#authentication-configuration)
+  - [Usage](#authentication-usage)
+  - [Implementation Details](#authentication-implementation-details)
+- [API Documentation](#api-documentation)
+- [Endpoints](#endpoints)
+- [Request/Response Contracts](#requestresponse-contracts)
+- [Error Handling](#error-handling)
+- [Logging](#logging)
+- [Running Tests and Coverage](#running-tests-and-coverage)
+- [Development Notes](#development-notes)
+- [VS Code Tips](#vs-code-tips)
+- [Contributing](#contributing)
+- [License](#license)
+- [Appendix](#appendix)
+  - [Example Requests](#example-requests)
+  - [Sample Error Payloads](#sample-error-payloads)
+  - [Troubleshooting](#troubleshooting)
 
 ## Features
 
@@ -86,7 +112,7 @@ Pinned NuGet dependencies:
 - FluentValidation.DependencyInjectionExtensions: 11.9.0
 - FluentValidation.AspNetCore: 11.3.0
 
-### Restore, build, run
+### Restore, Build, Run
 
 ```bash
 dotnet restore
@@ -99,7 +125,7 @@ PowerShell:
 dotnet restore; dotnet build; dotnet run --project Example.LibraryItem/Example.LibraryItem.csproj
 ```
 
-### Run with watch
+### Run with Watch
 
 ```bash
 dotnet watch --project Example.LibraryItem/Example.LibraryItem.csproj run
@@ -107,16 +133,122 @@ dotnet watch --project Example.LibraryItem/Example.LibraryItem.csproj run
 
 ## Configuration
 
-- Keys in `appsettings*.json`:
-  - `Database:Provider`: `"sqlite"` (default) or `"inmemory"`
-  - `ConnectionStrings:Default`: Sqlite connection (e.g., `"Data Source=library.db"`)
-- Environments: set `ASPNETCORE_ENVIRONMENT` to `Development` for Swagger and HTTP logging.
-- API key auth: scheme `ApiKey`; header name `X-API-Key` (see [`Api/Auth.cs`](Example.LibraryItem/Api/Auth.cs) and [`Program.cs`](Example.LibraryItem/Program.cs)).
+### Development Configuration
 
-## Database Providers
+For local development, use the default configuration in `appsettings.Development.json`:
 
-- Sqlite (default): configured from `ConnectionStrings:Default`.
-- InMemory (dev/tests): set `Database:Provider=inmemory` or run in Development without a configured provider (see provider selection in [`Program.cs`](Example.LibraryItem/Program.cs)).
+```json
+{
+  "Database": {
+    "Provider": "inmemory"
+  },
+  "ApiKeys": [
+    "dev-key",
+    "test-key", 
+    "local-development-key"
+  ]
+}
+```
+
+- **Database**: Uses in-memory database (no setup required)
+- **API Keys**: Development keys for easy testing
+- **Environment**: Set via `Properties/launchSettings.json` or `ASPNETCORE_ENVIRONMENT=Development`
+- **Seed Data**: Automatically populated with 20 diverse library items on startup
+
+### Production Configuration
+
+Create `appsettings.Production.json` or use environment variables:
+
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "Default": "Data Source=/app/data/library.db"
+  },
+  "Database": {
+    "Provider": "sqlite"
+  },
+  "ApiKeys": [
+    "your-secure-production-key-here",
+    "backup-production-key"
+  ]
+}
+```
+
+**Key Production Settings:**
+
+- **`AllowedHosts`**: Controls which hostnames are allowed for requests (used by ASP.NET Core Host Filtering)
+- **`ConnectionStrings:Default`**: SQLite database file path - used by `Program.cs:91` for database connection
+- **`Database:Provider`**: Set to `"sqlite"` for production (default behavior)
+- **`ApiKeys`**: **Must** replace placeholder keys with secure values
+
+**Environment Variables (Alternative):**
+```bash
+# Database
+ConnectionStrings__Default="/app/data/library.db"
+Database__Provider="sqlite"
+
+# API Keys
+ApiKeys__0="secure-production-key-1"
+ApiKeys__1="secure-production-key-2"
+
+# Environment
+ASPNETCORE_ENVIRONMENT="Production"
+```
+
+**Production Deployment Commands:**
+```bash
+# Method 1: Using appsettings.Production.json
+ASPNETCORE_ENVIRONMENT=Production dotnet run --project Example.LibraryItem --no-launch-profile
+
+# Method 2: Using environment variables
+ApiKeys__0="your-secure-key" ASPNETCORE_ENVIRONMENT=Production dotnet run --project Example.LibraryItem --no-launch-profile
+
+# Method 3: Published application
+dotnet publish Example.LibraryItem -c Release -o ./publish
+cd publish
+ApiKeys__0="your-secure-key" ASPNETCORE_ENVIRONMENT=Production dotnet Example.LibraryItem.dll
+```
+
+⚠️ **Security**: The application will crash on startup if placeholder keys like `"CHANGE-ME-OR-SERVER-WILL-CRASH"` are detected in non-Development environments.
+
+### Development Seed Data
+
+In Development environment, the application automatically seeds the database with 20 diverse library items across multiple categories:
+
+**Sample Items Include:**
+- **Classic Literature**: The Great Gatsby, To Kill a Mockingbird, 1984, Pride and Prejudice
+- **Science & Technology**: Computer Programming texts, Introduction to Algorithms, Clean Code
+- **Academic Journals**: Nature, Science magazines
+- **History**: A People's History of the United States, Sapiens
+- **Philosophy**: Meditations by Marcus Aurelius
+- **Science Fiction**: Dune, Foundation, Lord of the Rings
+- **And more**: Economics, Poetry, Children's Literature, Sociology, Religion, Drama, Medicine, Environmental Science, Music
+
+**Seed Data Features:**
+- Only applied in Development environment (`ASPNETCORE_ENVIRONMENT=Development`)
+- Includes realistic ISBNs, call numbers, and location data
+- Demonstrates different item types and statuses
+- Automatically populated on application startup
+- **Production Safe**: No seed data applied in Production/Staging environments
+
+### Database Providers
+
+The application supports two database providers configured via `Database:Provider`:
+
+- **SQLite** (default): Uses `ConnectionStrings:Default` for file path
+  - Development: `"Data Source=library.db"` (current directory)
+  - Production: `"Data Source=/app/data/library.db"` (recommended for containers)
+- **InMemory**: Set `Database:Provider=inmemory` for testing/development
+  - Automatically used in Development environment if no provider specified
+  - Data is lost when application stops
+  - **Development only**: Automatically seeded with 20 diverse library items
 
 ## API Documentation
 
@@ -167,10 +299,36 @@ Centralized in [`Api/ErrorHandling.cs`](Example.LibraryItem/Api/ErrorHandling.cs
 
 ## Authentication
 
-- Scheme: `ApiKey` (see [`Api/Auth.cs`](Example.LibraryItem/Api/Auth.cs)).
-- Header: `X-API-Key`.
-- Add to every request; empty/missing keys fail. Authentication wires in [`Program.cs`](Example.LibraryItem/Program.cs) and all item routes use `.RequireAuthorization()`.
-- Failure responses: `401 Unauthorized` or `403 Forbidden` depending on the pipeline and middleware.
+API key authentication is required for all endpoints under `/v1/items`.
+
+### Authentication Configuration
+
+API keys are configured in the `ApiKeys` array in `appsettings*.json`:
+
+```json
+{
+  "ApiKeys": [
+    "your-secure-api-key-here",
+    "another-valid-key"
+  ]
+}
+```
+
+**⚠️ Security Notice:** The application will crash on startup if placeholder keys like `"CHANGE-ME-OR-SERVER-WILL-CRASH"` are detected in non-Development environments.
+
+### Authentication Usage
+
+- **Scheme**: `ApiKey` (see [`Api/Authentication/ApiKeyDefaults.cs`](Example.LibraryItem/Api/Authentication/ApiKeyDefaults.cs))
+- **Header**: `X-API-Key`
+- **Required**: All `/v1/items` endpoints require a valid API key
+- **Validation**: Empty/missing keys return `401 Unauthorized`
+
+### Authentication Implementation Details
+
+- Authentication handler: [`Api/Authentication/ApiKeyAuthenticationHandler.cs`](Example.LibraryItem/Api/Authentication/ApiKeyAuthenticationHandler.cs)
+- Startup validation: [`Api/ApiKeyValidator.cs`](Example.LibraryItem/Api/ApiKeyValidator.cs) prevents deployment with insecure keys
+- Logging: Failed attempts are logged with IP address and key prefix for security monitoring
+- Claims: Authenticated requests receive `apikey-user` identity with API key prefix claim
 
 ## Logging
 
@@ -227,7 +385,7 @@ This template uses MIT for the badge. If your repository includes a different li
 
 ## Appendix
 
-### Example requests
+### Example Requests
 
 Replace `<API_KEY>` with your key.
 
@@ -280,7 +438,7 @@ Delete:
 curl -X DELETE -H "X-API-Key: <API_KEY>" https://localhost:5001/v1/items/<GUID>
 ```
 
-### Sample error payloads
+### Sample Error Payloads
 
 422 validation error:
 ```json

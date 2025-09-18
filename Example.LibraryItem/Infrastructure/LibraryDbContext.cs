@@ -83,7 +83,12 @@ namespace Example.LibraryItem.Infrastructure
             // Supports currency values up to 9,999,999,999,999,999.99
             item.Property(i => i.Cost).HasPrecision(18, 2);
 
+            // Seed data for development environment only
+            // Check environment through configuration or other means since IWebHostEnvironment isn't available here
+            // For now, we'll use conditional compilation or move seeding to a different approach
+
             base.OnModelCreating(modelBuilder);
         }
+
     }
 }
