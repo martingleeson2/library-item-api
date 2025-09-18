@@ -24,6 +24,18 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Library Management System API", Version = "v1" });
+    
+    // API Key authentication
+    c.AddSecurityDefinition(ApiKeyDefaults.Scheme, new OpenApiSecurityScheme
+    {
+        Description = "API Key via X-API-Key header",
+        Name = ApiKeyDefaults.HeaderName,
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = ApiKeyDefaults.Scheme
+    });
+    
+    // JWT Bearer authentication (for future use)
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme.",
@@ -33,20 +45,10 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "bearer",
         BearerFormat = "JWT"
     });
-    c.AddSecurityDefinition(ApiKeyDefaults.Scheme, new OpenApiSecurityScheme
-    {
-        Description = "API Key via X-API-Key header",
-        Name = ApiKeyDefaults.HeaderName,
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = ApiKeyDefaults.Scheme
-    });
+    
+    // For now, require API Key authentication globally
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
-        {
-            new OpenApiSecurityScheme{ Reference = new OpenApiReference{ Type = ReferenceType.SecurityScheme, Id = "Bearer" } },
-            Array.Empty<string>()
-        },
         {
             new OpenApiSecurityScheme{ Reference = new OpenApiReference{ Type = ReferenceType.SecurityScheme, Id = ApiKeyDefaults.Scheme } },
             Array.Empty<string>()
@@ -88,8 +90,20 @@ else
     builder.Services.AddDbContext<LibraryDbContext>(opt => opt.UseSqlite(connectionString));
 }
 
-// Authentication/Authorization: API Key scheme
-builder.Services.AddApiKeyAuthentication(builder.Configuration);
+// Authentication/Authorization: ApiKey as per OpenAPI contract
+// Note: JWT Bearer authentication would require Microsoft.AspNetCore.Authentication.JwtBearer package
+builder.Services.AddAuthentication(ApiKeyDefaults.Scheme)
+    .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(
+        ApiKeyDefaults.Scheme, 
+        options =>
+        {
+            var apiKeys = builder.Configuration.GetSection("ApiKeys").Get<string[]>() ?? 
+                         builder.Configuration.GetSection("Authentication:ApiKey:ValidApiKeys").Get<string[]>() ?? [];
+            options.ValidApiKeys = apiKeys.Where(k => !string.IsNullOrWhiteSpace(k)).ToList();
+            options.HeaderName = "X-API-Key";
+        });
+
+builder.Services.AddAuthorization();
 
 // Error handling services
 builder.Services.AddErrorHandling();

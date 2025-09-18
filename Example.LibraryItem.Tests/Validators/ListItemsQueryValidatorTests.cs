@@ -20,11 +20,11 @@ public class ListItemsQueryValidatorTests
     {
         var query = new ListItemsQuery(0, 10, null, null, null, null, null, null, null, null, null, null, null, null, null);
         var result = _validator.TestValidate(query);
-        result.ShouldHaveValidationErrorFor(x => x.page);
+        result.ShouldHaveValidationErrorFor(x => x.Page);
 
-        query = query with { page = 1 };
+        query = query with { Page = 1 };
         result = _validator.TestValidate(query);
-        result.ShouldNotHaveValidationErrorFor(x => x.page);
+        result.ShouldNotHaveValidationErrorFor(x => x.Page);
     }
 
     [Test]
@@ -32,15 +32,15 @@ public class ListItemsQueryValidatorTests
     {
         var query = new ListItemsQuery(1, 0, null, null, null, null, null, null, null, null, null, null, null, null, null);
         var result = _validator.TestValidate(query);
-        result.ShouldHaveValidationErrorFor(x => x.limit);
+        result.ShouldHaveValidationErrorFor(x => x.Limit);
 
-        query = query with { limit = 101 };
+        query = query with { Limit = 101 };
         result = _validator.TestValidate(query);
-        result.ShouldHaveValidationErrorFor(x => x.limit);
+        result.ShouldHaveValidationErrorFor(x => x.Limit);
 
-        query = query with { limit = 50 };
+        query = query with { Limit = 50 };
         result = _validator.TestValidate(query);
-        result.ShouldNotHaveValidationErrorFor(x => x.limit);
+        result.ShouldNotHaveValidationErrorFor(x => x.Limit);
     }
 
     [Test]
@@ -48,23 +48,23 @@ public class ListItemsQueryValidatorTests
     {
         var query = new ListItemsQuery(1, 10, null, null, null, null, null, null, null, null, null, null, null, "invalid_field", null);
         var result = _validator.TestValidate(query);
-        result.ShouldHaveValidationErrorFor(x => x.sort_by);
+        result.ShouldHaveValidationErrorFor(x => x.SortBy);
 
-        query = query with { sort_by = "title" };
+        query = query with { SortBy = "title" };
         result = _validator.TestValidate(query);
-        result.ShouldNotHaveValidationErrorFor(x => x.sort_by);
+        result.ShouldNotHaveValidationErrorFor(x => x.SortBy);
 
-        query = query with { sort_by = "author" };
+        query = query with { SortBy = "author" };
         result = _validator.TestValidate(query);
-        result.ShouldNotHaveValidationErrorFor(x => x.sort_by);
+        result.ShouldNotHaveValidationErrorFor(x => x.SortBy);
 
-        query = query with { sort_by = "publication_date" };
+        query = query with { SortBy = "publication_date" };
         result = _validator.TestValidate(query);
-        result.ShouldNotHaveValidationErrorFor(x => x.sort_by);
+        result.ShouldNotHaveValidationErrorFor(x => x.SortBy);
 
-        query = query with { sort_by = null };
+        query = query with { SortBy = null };
         result = _validator.TestValidate(query);
-        result.ShouldNotHaveValidationErrorFor(x => x.sort_by);
+        result.ShouldNotHaveValidationErrorFor(x => x.SortBy);
     }
 
     [Test]
@@ -72,19 +72,19 @@ public class ListItemsQueryValidatorTests
     {
         var query = new ListItemsQuery(1, 10, null, null, null, null, null, null, null, null, null, null, null, null, "invalid");
         var result = _validator.TestValidate(query);
-        result.ShouldHaveValidationErrorFor(x => x.sort_order);
+        result.ShouldHaveValidationErrorFor(x => x.SortOrder);
 
-        query = query with { sort_order = "asc" };
+        query = query with { SortOrder = "asc" };
         result = _validator.TestValidate(query);
-        result.ShouldNotHaveValidationErrorFor(x => x.sort_order);
+        result.ShouldNotHaveValidationErrorFor(x => x.SortOrder);
 
-        query = query with { sort_order = "desc" };
+        query = query with { SortOrder = "desc" };
         result = _validator.TestValidate(query);
-        result.ShouldNotHaveValidationErrorFor(x => x.sort_order);
+        result.ShouldNotHaveValidationErrorFor(x => x.SortOrder);
 
-        query = query with { sort_order = null };
+        query = query with { SortOrder = null };
         result = _validator.TestValidate(query);
-        result.ShouldNotHaveValidationErrorFor(x => x.sort_order);
+        result.ShouldNotHaveValidationErrorFor(x => x.SortOrder);
     }
 
     [Test]
@@ -92,15 +92,15 @@ public class ListItemsQueryValidatorTests
     {
         var query = new ListItemsQuery(1, 10, null, null, null, null, null, null, null, null, null, 999, null, null, null);
         var result = _validator.TestValidate(query);
-        result.ShouldHaveValidationErrorFor(x => x.publication_year_from);
+        result.ShouldHaveValidationErrorFor(x => x.PublicationYearFrom);
 
-        query = query with { publication_year_from = 2000 };
+        query = query with { PublicationYearFrom = 2000 };
         result = _validator.TestValidate(query);
-        result.ShouldNotHaveValidationErrorFor(x => x.publication_year_from);
+        result.ShouldNotHaveValidationErrorFor(x => x.PublicationYearFrom);
 
-        query = query with { publication_year_from = null };
+        query = query with { PublicationYearFrom = null };
         result = _validator.TestValidate(query);
-        result.ShouldNotHaveValidationErrorFor(x => x.publication_year_from);
+        result.ShouldNotHaveValidationErrorFor(x => x.PublicationYearFrom);
     }
 
     [Test]
@@ -108,36 +108,36 @@ public class ListItemsQueryValidatorTests
     {
         var query = new ListItemsQuery(1, 10, null, null, null, null, null, null, null, null, null, null, 999, null, null);
         var result = _validator.TestValidate(query);
-        result.ShouldHaveValidationErrorFor(x => x.publication_year_to);
+        result.ShouldHaveValidationErrorFor(x => x.PublicationYearTo);
 
-        query = query with { publication_year_to = 2023 };
+        query = query with { PublicationYearTo = 2023 };
         result = _validator.TestValidate(query);
-        result.ShouldNotHaveValidationErrorFor(x => x.publication_year_to);
+        result.ShouldNotHaveValidationErrorFor(x => x.PublicationYearTo);
 
-        query = query with { publication_year_to = null };
+        query = query with { PublicationYearTo = null };
         result = _validator.TestValidate(query);
-        result.ShouldNotHaveValidationErrorFor(x => x.publication_year_to);
+        result.ShouldNotHaveValidationErrorFor(x => x.PublicationYearTo);
     }
 
     [Test]
     public void Valid_Query_Should_Pass_Validation()
     {
         var query = new ListItemsQuery(
-            page: 1,
-            limit: 20,
-            title: "Test Book",
-            author: "Test Author",
-            isbn: "9780743273565",
-            item_type: ItemType.book,
-            status: ItemStatus.available,
-            collection: "Fiction",
-            location_floor: 2,
-            location_section: "Fiction",
-            call_number: "001.42",
-            publication_year_from: 2000,
-            publication_year_to: 2023,
-            sort_by: "title",
-            sort_order: "asc"
+            Page: 1,
+            Limit: 20,
+            Title: "Test Book",
+            Author: "Test Author",
+            Isbn: "9780743273565",
+            ItemType: ItemType.book,
+            Status: ItemStatus.available,
+            Collection: "Fiction",
+            LocationFloor: 2,
+            LocationSection: "Fiction",
+            CallNumber: "001.42",
+            PublicationYearFrom: 2000,
+            PublicationYearTo: 2023,
+            SortBy: "title",
+            SortOrder: "asc"
         );
 
         var result = _validator.TestValidate(query);

@@ -11,10 +11,4 @@ namespace Example.LibraryItem.Application.Dtos
         [JsonPropertyName("has_next")] public required bool HasNext { get; init; }
         [JsonPropertyName("has_previous")] public required bool HasPrevious { get; init; }
     }
-
-    public record ValidationError
-    {
-        [JsonPropertyName("field")] public required string Field { get; init; }
-        [JsonPropertyName("message")] public required string Message { get; init; }
-    }
 }

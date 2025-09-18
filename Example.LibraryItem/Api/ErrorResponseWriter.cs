@@ -19,11 +19,11 @@ public class ErrorResponseWriter(TimeProvider timeProvider) : IErrorResponseWrit
         {
             Error = ErrorCodes.VALIDATION_ERROR,
             Message = "The request contains validation errors",
-            ValidationErrors = exception.Errors.Select(e => new ValidationError 
-            { 
-                Field = e.PropertyName, 
-                Message = e.ErrorMessage 
-            }).ToList(),
+            ValidationErrors = [.. exception.Errors.Select(e => new ValidationError
+            {
+                Field = e.PropertyName,
+                Message = e.ErrorMessage
+            })],
             Timestamp = _timeProvider.GetUtcNow().UtcDateTime,
             RequestId = requestId
         };

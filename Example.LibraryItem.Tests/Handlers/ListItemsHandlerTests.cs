@@ -47,12 +47,12 @@ public class ListItemsHandlerTests
 
         var handler = new ListItemsHandler(db, logger);
         var query = new ListItemsQuery(
-            page: 1, limit: 3,
-            title: null, author: null, isbn: null,
-            item_type: null, status: null, collection: null,
-            location_floor: null, location_section: null, call_number: null,
-            publication_year_from: null, publication_year_to: null,
-            sort_by: null, sort_order: null
+            Page: 1, Limit: 3,
+            Title: null, Author: null, Isbn: null,
+            ItemType: null, Status: null, Collection: null,
+            LocationFloor: null, LocationSection: null, CallNumber: null,
+            PublicationYearFrom: null, PublicationYearTo: null,
+            SortBy: null, SortOrder: null
         );
 
         // Act
@@ -104,12 +104,12 @@ public class ListItemsHandlerTests
 
         var handler = new ListItemsHandler(db, logger);
         var query = new ListItemsQuery(
-            page: 1, limit: 10,
-            title: "Great", author: null, isbn: null,
-            item_type: null, status: null, collection: null,
-            location_floor: null, location_section: null, call_number: null,
-            publication_year_from: null, publication_year_to: null,
-            sort_by: null, sort_order: null
+            Page: 1, Limit: 10,
+            Title: "Great", Author: null, Isbn: null,
+            ItemType: null, Status: null, Collection: null,
+            LocationFloor: null, LocationSection: null, CallNumber: null,
+            PublicationYearFrom: null, PublicationYearTo: null,
+            SortBy: null, SortOrder: null
         );
 
         // Act
@@ -159,12 +159,12 @@ public class ListItemsHandlerTests
 
         var handler = new ListItemsHandler(db, logger);
         var query = new ListItemsQuery(
-            page: 1, limit: 10,
-            title: null, author: null, isbn: null,
-            item_type: null, status: ItemStatus.checked_out, collection: null,
-            location_floor: null, location_section: null, call_number: null,
-            publication_year_from: null, publication_year_to: null,
-            sort_by: null, sort_order: null
+            Page: 1, Limit: 10,
+            Title: null, Author: null, Isbn: null,
+            ItemType: null, Status: ItemStatus.checked_out, Collection: null,
+            LocationFloor: null, LocationSection: null, CallNumber: null,
+            PublicationYearFrom: null, PublicationYearTo: null,
+            SortBy: null, SortOrder: null
         );
 
         // Act
@@ -186,12 +186,12 @@ public class ListItemsHandlerTests
         var logger = Mock.Of<ILogger<ListItemsHandler>>();
         var handler = new ListItemsHandler(db, logger);
         var query = new ListItemsQuery(
-            page: 1, limit: 10,
-            title: null, author: null, isbn: null,
-            item_type: null, status: null, collection: null,
-            location_floor: null, location_section: null, call_number: null,
-            publication_year_from: null, publication_year_to: null,
-            sort_by: null, sort_order: null
+            Page: 1, Limit: 10,
+            Title: null, Author: null, Isbn: null,
+            ItemType: null, Status: null, Collection: null,
+            LocationFloor: null, LocationSection: null, CallNumber: null,
+            PublicationYearFrom: null, PublicationYearTo: null,
+            SortBy: null, SortOrder: null
         );
 
         // Act

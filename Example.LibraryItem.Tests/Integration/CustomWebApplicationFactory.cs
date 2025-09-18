@@ -13,18 +13,17 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseEnvironment("Development");
-        builder.UseDefaultServiceProvider((context, options) =>
-        {
-            options.ValidateScopes = false;
-            options.ValidateOnBuild = false;
-        });
+        builder.UseEnvironment("Testing");
         builder.ConfigureAppConfiguration((context, configBuilder) =>
         {
             var inMemorySettings = new Dictionary<string, string?>
             {
                 ["DisableHttpsRedirection"] = "true",
-                ["DisableHttpLogging"] = "true"
+                ["DisableHttpLogging"] = "true",
+                ["Database:Provider"] = "inmemory",
+                // Configure API keys for tests using simplified structure
+                ["ApiKeys:0"] = "test-key",
+                ["ApiKeys:1"] = "integration-test-key"
             };
             configBuilder.AddInMemoryCollection(inMemorySettings!);
         });

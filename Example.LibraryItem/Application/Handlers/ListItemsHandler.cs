@@ -13,11 +13,11 @@ namespace Example.LibraryItem.Application.Handlers
             
             var query = db.Items.AsNoTracking().AsQueryable();
             query = ApplyFilters(query, q);
-            query = ApplySort(query, q.sort_by, q.sort_order);
+            query = ApplySort(query, q.SortBy, q.SortOrder);
 
             var totalItems = await query.CountAsync(ct);
-            var totalPages = (int)Math.Ceiling(totalItems / (double)q.limit);
-            var items = await query.Skip((q.page - 1) * q.limit).Take(q.limit).ToListAsync(ct);
+            var totalPages = (int)Math.Ceiling(totalItems / (double)q.Limit);
+            var items = await query.Skip((q.Page - 1) * q.Limit).Take(q.Limit).ToListAsync(ct);
             
             var basePath = string.Empty; // Actual base path will be added in endpoint composition
             var data = items.Select(i => i.ToDto(basePath)).ToList();
@@ -28,44 +28,44 @@ namespace Example.LibraryItem.Application.Handlers
                 Pagination = CreatePaginationDto(q, totalItems, totalPages)
             };
             
-            logger.LogInformation("Listed {Count} of {Total} items on page {Page}", data.Count, totalItems, q.page);
+            logger.LogInformation("Listed {Count} of {Total} items on page {Page}", data.Count, totalItems, q.Page);
             return response;
         }
 
         private static IQueryable<Item> ApplyFilters(IQueryable<Item> query, ListItemsQuery q)
         {
-            if (!string.IsNullOrWhiteSpace(q.title)) 
-                query = query.Where(i => i.Title.Contains(q.title));
+            if (!string.IsNullOrWhiteSpace(q.Title)) 
+                query = query.Where(i => i.Title.Contains(q.Title));
                 
-            if (!string.IsNullOrWhiteSpace(q.author)) 
-                query = query.Where(i => i.Author != null && i.Author.Contains(q.author));
+            if (!string.IsNullOrWhiteSpace(q.Author)) 
+                query = query.Where(i => i.Author != null && i.Author.Contains(q.Author));
                 
-            if (!string.IsNullOrWhiteSpace(q.isbn)) 
-                query = query.Where(i => i.Isbn == q.isbn);
+            if (!string.IsNullOrWhiteSpace(q.Isbn)) 
+                query = query.Where(i => i.Isbn == q.Isbn);
                 
-            if (q.item_type.HasValue) 
-                query = query.Where(i => i.ItemType == q.item_type);
+            if (q.ItemType.HasValue) 
+                query = query.Where(i => i.ItemType == q.ItemType);
                 
-            if (q.status.HasValue) 
-                query = query.Where(i => i.Status == q.status);
+            if (q.Status.HasValue) 
+                query = query.Where(i => i.Status == q.Status);
                 
-            if (!string.IsNullOrWhiteSpace(q.collection)) 
-                query = query.Where(i => i.Collection == q.collection);
+            if (!string.IsNullOrWhiteSpace(q.Collection)) 
+                query = query.Where(i => i.Collection == q.Collection);
                 
-            if (q.location_floor.HasValue) 
-                query = query.Where(i => i.Location.Floor == q.location_floor);
+            if (q.LocationFloor.HasValue) 
+                query = query.Where(i => i.Location.Floor == q.LocationFloor);
                 
-            if (!string.IsNullOrWhiteSpace(q.location_section)) 
-                query = query.Where(i => i.Location.Section == q.location_section);
+            if (!string.IsNullOrWhiteSpace(q.LocationSection)) 
+                query = query.Where(i => i.Location.Section == q.LocationSection);
                 
-            if (!string.IsNullOrWhiteSpace(q.call_number)) 
-                query = query.Where(i => i.CallNumber.Contains(q.call_number));
+            if (!string.IsNullOrWhiteSpace(q.CallNumber)) 
+                query = query.Where(i => i.CallNumber.Contains(q.CallNumber));
                 
-            if (q.publication_year_from.HasValue) 
-                query = query.Where(i => i.PublicationDate != null && i.PublicationDate.Value.Year >= q.publication_year_from);
+            if (q.PublicationYearFrom.HasValue) 
+                query = query.Where(i => i.PublicationDate != null && i.PublicationDate.Value.Year >= q.PublicationYearFrom);
                 
-            if (q.publication_year_to.HasValue) 
-                query = query.Where(i => i.PublicationDate != null && i.PublicationDate.Value.Year <= q.publication_year_to);
+            if (q.PublicationYearTo.HasValue) 
+                query = query.Where(i => i.PublicationDate != null && i.PublicationDate.Value.Year <= q.PublicationYearTo);
 
             return query;
         }
@@ -94,12 +94,12 @@ namespace Example.LibraryItem.Application.Handlers
         {
             return new PaginationDto
             {
-                Page = q.page,
-                Limit = q.limit,
+                Page = q.Page,
+                Limit = q.Limit,
                 TotalItems = totalItems,
                 TotalPages = totalPages,
-                HasNext = q.page < totalPages,
-                HasPrevious = q.page > 1
+                HasNext = q.Page < totalPages,
+                HasPrevious = q.Page > 1
             };
         }
     }

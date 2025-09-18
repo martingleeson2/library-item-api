@@ -20,6 +20,8 @@ These instructions customize GitHub Copilot (GPT-5) for this repository to ensur
 ## Coding Standards & Style (C# / .NET 8)
 - Naming:
   - PascalCase for classes, methods, properties, public fields; camelCase for locals/parameters; private fields camelCase prefixed with _.
+  - ALL property names in records, classes, DTOs, and query objects MUST use PascalCase (e.g., ItemType, LocationFloor, CallNumber, SortBy, Status, Collection) - never snake_case.
+  - Use [FromQuery(Name = "snake_case")] attributes when backward compatibility with snake_case query parameters is required.
   - ALL_CAPS for constants.
 - Methods: keep small, single-responsibility; prefer expression-bodied members when it helps clarity.
 - Use var when type is obvious; otherwise use explicit types for clarity.
@@ -34,6 +36,18 @@ These instructions customize GitHub Copilot (GPT-5) for this repository to ensur
 - LINQ: be mindful of query translation; push filtering/pagination to the database (IQueryable) when using EF Core.
 - Time: use TimeProvider (injectable) rather than DateTime.Now; use Utc for timestamps.
 - Serialization: use System.Text.Json; avoid Newtonsoft unless required.
+
+## Documentation & Comments
+- **XML Documentation Required**: All public classes, methods, properties, and interfaces MUST have XML documentation (`/// <summary>`).
+- **Complex Logic Comments**: Add inline comments for business logic, complex algorithms, or non-obvious implementation decisions.
+- **Security-Related Code**: Always document security implications, especially in authentication, authorization, and validation code.
+- **Constants & Magic Numbers**: Document the purpose and rationale for all constants with XML comments.
+- **Parameter Documentation**: Document all parameters with `/// <param>` tags, especially their validation rules and expected formats.
+- **Return Documentation**: Document return values with `/// <returns>` tags, including possible null returns and failure scenarios.
+- **Exception Documentation**: Document thrown exceptions with `/// <exception>` tags when applicable.
+- **Examples**: Provide `/// <example>` tags for complex public APIs or when usage patterns are not obvious.
+- **Code Comments**: Use `//` for explaining "why" rather than "what"; the code should be self-documenting for "what".
+- **TODO/FIXME**: Always include context and timeline for any TODO or FIXME comments.
 
 ## Architecture & Methodologies
 - Clean layering with clear boundaries: API ↔ Application ↔ Domain ↔ Infrastructure.
@@ -107,6 +121,57 @@ These instructions customize GitHub Copilot (GPT-5) for this repository to ensur
 - Use Shouldly for assertions (preferred) for readable, intention-revealing tests: `result.ShouldNotBeNull(); items.Count.ShouldBe(3); response.StatusCode.ShouldBe(StatusCodes.Status200OK);`
 - Test happy paths and edge cases; aim for meaningful coverage.
 - Automate tests in CI; ensure consistent seeds/fixtures.
+
+### Test Execution Strategies (dotnet test)
+Use targeted test execution for efficient development and debugging. Prefer specific filters over running all tests during development:
+
+**By Test Class (most common for development):**
+```bash
+# Test a specific class
+dotnet test --filter "FullyQualifiedName~ApiKeyAuthenticationHandlerTests"
+dotnet test --filter "FullyQualifiedName~CreateItemHandlerTests"
+dotnet test --filter "FullyQualifiedName~ItemCreateValidatorTests"
+```
+
+**By Test Method (for debugging specific scenarios):**
+```bash
+# Test a specific method
+dotnet test --filter "FullyQualifiedName~PostRequest_WithValidApiKey_ReturnsBadRequestForInvalidBody"
+dotnet test --filter "Name=Handle_ValidCreateRequest_ReturnsCreatedItem"
+```
+
+**By Category/Area (for layer-specific testing):**
+```bash
+# All handler tests
+dotnet test --filter "FullyQualifiedName~HandlerTests"
+# All validator tests
+dotnet test --filter "FullyQualifiedName~ValidatorTests"
+# All integration tests
+dotnet test --filter "FullyQualifiedName~Integration"
+# All authentication tests
+dotnet test --filter "FullyQualifiedName~Authentication"
+```
+
+**By Test Results (for CI/debugging):**
+```bash
+# Full suite with detailed output
+dotnet test --logger "console;verbosity=detailed"
+# With coverage (if configured)
+dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+# Fail fast on first error
+dotnet test --maxcpucount:1 --blame-hang-timeout 30s
+```
+
+**Development Workflow:**
+1. **TDD Cycle**: Run specific test method while developing: `dotnet test --filter "Name=YourNewTestMethod"`
+2. **Feature Testing**: Run all tests for the class you're working on: `dotnet test --filter "FullyQualifiedName~YourClassTests"`
+3. **Pre-commit**: Run full test suite: `dotnet test` or use the VS Code task `test: all`
+4. **Debugging Failures**: Use detailed verbosity: `dotnet test --filter "FullyQualifiedName~FailingTest" --logger "console;verbosity=detailed"`
+
+**VS Code Integration:**
+- Use the pre-configured tasks: `test: all` and `test: coverage`
+- Run specific tests via Test Explorer extension
+- Set breakpoints and debug individual tests via VS Code debugger
 
 ### Testing Conventions (Moq + Shouldly)
 - Prefer strict, explicit verifications: `mock.Verify(s => s.Do(It.Is<Arg>(a => a.Id == id)), Times.Once);`
@@ -203,6 +268,7 @@ These instructions customize GitHub Copilot (GPT-5) for this repository to ensur
 - Creating handlers that perform both query and mutation in one method.
 - Blocking on async code (.Result/.Wait()).
 - Logging sensitive data (API keys, PII).
+- Using snake_case for property names in records, DTOs, classes, or query objects (use PascalCase instead).
 
 ## Repository Expectations (for Copilot)
 - Prefer adding/changing code in the correct layer/file:
@@ -214,4 +280,14 @@ These instructions customize GitHub Copilot (GPT-5) for this repository to ensur
 - Use AsNoTracking for read queries, projections for DTOs, and structured logging.
 - Keep DTOs immutable; use records and required.
 - Mirror HTTP response contracts in DTOs and validators.
- - In tests, default to Moq for mocks and Shouldly for assertions. Only use alternative frameworks when a scenario cannot be expressed clearly with these.
+- In tests, default to Moq for mocks and Shouldly for assertions. Only use alternative frameworks when a scenario cannot be expressed clearly with these.
+
+### Test Execution Guidelines (for Copilot)
+When running tests as part of development or debugging:
+- **Prefer targeted test execution** over running all tests during active development
+- **Use class-level filtering** when working on a specific component: `--filter "FullyQualifiedName~ComponentTests"`
+- **Use method-level filtering** when debugging a specific scenario: `--filter "Name=SpecificTestMethod"`
+- **Always run full test suite** before declaring work complete or submitting changes
+- **Use detailed verbosity** when investigating test failures: `--logger "console;verbosity=detailed"`
+- **Leverage VS Code tasks** (`test: all`, `test: coverage`) for common scenarios
+- **Document any new test patterns** that emerge for complex scenarios in this file

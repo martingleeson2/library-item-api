@@ -6,8 +6,6 @@ namespace Example.LibraryItem.Api;
 
 public static class ApiKeyValidator
 {
-    private const string ValidApiKeysConfigPath = "Authentication:ValidApiKeys";
-
     private static readonly HashSet<string> PlaceholderKeys = [
         "CHANGE-ME-OR-SERVER-WILL-CRASH",
         "REPLACE-THIS-KEY-BEFORE-PRODUCTION",
@@ -27,17 +25,24 @@ public static class ApiKeyValidator
         var configuration = services.GetRequiredService<IConfiguration>();
         var logger = services.GetRequiredService<ILogger<Program>>();
 
-        var validApiKeys = GetConfiguredApiKeys(configuration);
+        var validApiKeys = configuration.GetSection("ApiKeys").Get<string[]>() ?? [];
 
-        if (validApiKeys.Count == 0)
+        if (validApiKeys.Length == 0)
         {
-            logger.LogCritical("FATAL: No API keys configured in {ConfigPath}. Server cannot start without authentication", ValidApiKeysConfigPath);
-            throw new InvalidOperationException($"FATAL: No API keys configured in {ValidApiKeysConfigPath}. Server cannot start without authentication.");
+            logger.LogCritical("FATAL: No valid API keys configured in ApiKeys section. Server cannot start without authentication");
+            throw new InvalidOperationException("FATAL: No valid API keys configured in ApiKeys section. Server cannot start without authentication.");
         }
 
         if (environment.IsDevelopment())
         {
-            logger.LogInformation("API key validation: Development environment. {Count} key(s) configured.", validApiKeys.Count);
+            logger.LogInformation("API key validation: Development environment. {Count} key(s) configured.", validApiKeys.Length);
+            return;
+        }
+
+        // Skip placeholder validation for Testing environment
+        if (environment.EnvironmentName == "Testing")
+        {
+            logger.LogInformation("API key validation: Testing environment. {Count} key(s) configured.", validApiKeys.Length);
             return;
         }
 
@@ -53,17 +58,6 @@ public static class ApiKeyValidator
                 $"FATAL: Placeholder API keys detected in {environment.EnvironmentName}. Found: [{placeholderList}]. Replace with secure production keys before deploying.");
         }
 
-        logger.LogInformation("API key validation passed for {Environment}. {Count} key(s) configured.", environment.EnvironmentName, validApiKeys.Count);
-    }
-
-    private static List<string> GetConfiguredApiKeys(IConfiguration configuration)
-    {
-        var keys = configuration.GetSection(ValidApiKeysConfigPath).Get<string[]>() ?? [];
-        
-        return [.. keys
-            .Where(s => !string.IsNullOrWhiteSpace(s))
-            .Select(s => s.Trim())
-            .Where(s => s.Length > 0)
-            .Distinct()];
+        logger.LogInformation("API key validation passed for {Environment}. {Count} key(s) configured.", environment.EnvironmentName, validApiKeys.Length);
     }
 }

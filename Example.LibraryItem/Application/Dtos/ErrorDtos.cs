@@ -2,10 +2,10 @@ using System.Text.Json.Serialization;
 
 namespace Example.LibraryItem.Application.Dtos
 {
-    public record ItemListResponseDto
+    public record ValidationError
     {
-        [JsonPropertyName("data")] public required List<ItemDto> Data { get; init; }
-        [JsonPropertyName("pagination")] public required PaginationDto Pagination { get; init; }
+        [JsonPropertyName("field")] public required string Field { get; init; }
+        [JsonPropertyName("message")] public required string Message { get; init; }
     }
 
     public record ErrorResponseDto
