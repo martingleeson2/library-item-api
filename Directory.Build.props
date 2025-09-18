@@ -2,9 +2,9 @@
   <!-- Enforce coverage on all test projects -->
   <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
     <CollectCoverage>true</CollectCoverage>
-    <CoverletOutput>$(MSBuildProjectDirectory)\coverage\</CoverletOutput>
+    <CoverletOutput>$(MSBuildProjectDirectory)/coverage/</CoverletOutput>
     <CoverletOutputFormat>opencover</CoverletOutputFormat>
-  <ExcludeByFile>**/Program.cs;**/Api/**/*.cs;**/Infrastructure/**/*.cs;**/Application/Handlers/ListItemsHandler.cs</ExcludeByFile>
+  <ExcludeByFile>**/Api/**/*.cs;**/Infrastructure/**/*.cs;**/Application/Handlers/ListItemsHandler.cs</ExcludeByFile>
     <Exclude>[Example.LibraryItem]*Program*;[Example.LibraryItem]Example.LibraryItem.Api.*;[Example.LibraryItem]Example.LibraryItem.Infrastructure.*;[Example.LibraryItem]Example.LibraryItem.Application.Handlers.ListItemsHandler;[Example.LibraryItem]*Endpoints*;[Example.LibraryItem]*ErrorHandling*;[Example.LibraryItem]*Auth*</Exclude>
     <Threshold>100</Threshold>
     <ThresholdType>line,branch,method</ThresholdType>

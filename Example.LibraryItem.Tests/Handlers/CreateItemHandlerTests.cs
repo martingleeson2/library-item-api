@@ -60,4 +60,64 @@ public class CreateItemHandlerTests
         };
         await Should.ThrowAsync<InvalidOperationException>(async () => await handler.HandleAsync(dto, "http://localhost", "tester"));
     }
+
+    [Test]
+    public async Task SkipsIsbnValidation_WhenIsbnIsNull()
+    {
+        using var db = TestHelpers.CreateInMemoryDb();
+        var handler = CreateHandler(db);
+        var dto = new ItemCreateRequestDto
+        {
+            Title = "The Great Gatsby",
+            ItemType = ItemType.book,
+            CallNumber = "813.52 F553g",
+            ClassificationSystem = ClassificationSystem.dewey_decimal,
+            Location = new ItemLocationDto { Floor = 1, Section = "REF", ShelfCode = "A-125" },
+            Isbn = null // No ISBN validation should occur
+        };
+        var result = await handler.HandleAsync(dto, "http://localhost", "tester");
+        result.ShouldNotBeNull();
+        result.Isbn.ShouldBeNull();
+    }
+
+    [Test]
+    public async Task SkipsIsbnValidation_WhenIsbnIsEmpty()
+    {
+        using var db = TestHelpers.CreateInMemoryDb();
+        var handler = CreateHandler(db);
+        var dto = new ItemCreateRequestDto
+        {
+            Title = "The Great Gatsby",
+            ItemType = ItemType.book,
+            CallNumber = "813.52 F553g",
+            ClassificationSystem = ClassificationSystem.dewey_decimal,
+            Location = new ItemLocationDto { Floor = 1, Section = "REF", ShelfCode = "A-125" },
+            Isbn = "" // Empty ISBN validation should be skipped
+        };
+        var result = await handler.HandleAsync(dto, "http://localhost", "tester");
+        result.ShouldNotBeNull();
+        result.Isbn.ShouldBe("");
+    }
+
+    [Test]
+    public async Task UsesProvidedUser_WhenUserParameterIsNotNull()
+    {
+        using var db = TestHelpers.CreateInMemoryDb();
+        var handler = CreateHandler(db);
+        var dto = new ItemCreateRequestDto
+        {
+            Title = "The Great Gatsby",
+            ItemType = ItemType.book,
+            CallNumber = "813.52 F553g",
+            ClassificationSystem = ClassificationSystem.dewey_decimal,
+            Location = new ItemLocationDto { Floor = 1, Section = "REF", ShelfCode = "A-125" }
+        };
+        var result = await handler.HandleAsync(dto, "http://localhost", "explicit-user");
+        result.ShouldNotBeNull();
+        
+        // Verify the item was created with the explicit user
+        var createdItem = await db.Items.FirstAsync();
+        createdItem.CreatedBy.ShouldBe("explicit-user");
+        createdItem.UpdatedBy.ShouldBe("explicit-user");
+    }
 }

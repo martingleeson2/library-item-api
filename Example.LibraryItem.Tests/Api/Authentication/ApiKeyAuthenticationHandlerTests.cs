@@ -304,8 +304,7 @@ public class ApiKeyAuthenticationHandlerTests
     #region Query Parameter Tests
 
     [Test]
-    [Ignore("Query parameter authentication not yet implemented")]
-    public async Task Request_WithValidApiKeyInQueryParameter_ReturnsSuccess()
+    public async Task Request_WithValidApiKeyInQueryParameter_ReturnsUnauthorized()
     {
         // Arrange
         var client = _factory.CreateUnauthenticatedClient();
@@ -314,7 +313,7 @@ public class ApiKeyAuthenticationHandlerTests
         var response = await client.GetAsync("/health?apikey=test-valid-key");
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
     [Test]
@@ -357,8 +356,7 @@ public class ApiKeyAuthenticationHandlerTests
     }
 
     [Test]
-    [Ignore("Query parameter authentication not yet implemented")]
-    public async Task Request_WithQueryParameterButNoHeader_UsesQueryParameter()
+    public async Task Request_WithQueryParameterButNoHeader_ReturnsUnauthorized()
     {
         // Arrange
         var client = _factory.CreateUnauthenticatedClient();
@@ -367,7 +365,7 @@ public class ApiKeyAuthenticationHandlerTests
         var response = await client.GetAsync("/health?apikey=another-valid-key");
 
         // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
     #endregion

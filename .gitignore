@@ -52,6 +52,11 @@ coverage*/
 **/coverage*/
 **/coverage*.xml
 **/coverage*.json
+**/coverage-report/
+
+# ReportGenerator (HTML coverage reports)
+coverage-report/
+.reportgenerator/
 
 # Database files (SQLite, etc.)
 *.db
@@ -79,6 +84,8 @@ ehthumbs.db
 
 # Dotnet tools cache
 .dotnet_tools/
+.dotnet-tools/
+**/.dotnet-tools/
 
 # Claude IDE
 .claude

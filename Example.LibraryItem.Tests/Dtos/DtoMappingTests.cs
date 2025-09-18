@@ -214,4 +214,136 @@ public class DtoMappingTests
         // Should update timestamp
         existingItem.UpdatedAt.ShouldBe(utcNow);
     }
+
+    [Test]
+    public void ToEntity_HandlesNullCollections_WithDefaults()
+    {
+        // Arrange
+        var createDto = new ItemCreateRequestDto
+        {
+            Title = "Test Book",
+            ItemType = ItemType.book,
+            CallNumber = "001.42",
+            ClassificationSystem = ClassificationSystem.dewey_decimal,
+            Location = new ItemLocationDto { Floor = 1, Section = "Test", ShelfCode = "T-123" },
+            Contributors = null, // Should default to empty list
+            Subjects = null, // Should default to empty list
+            Status = null // Should default to available
+        };
+
+        var utcNow = DateTime.UtcNow;
+
+        // Act
+        var item = createDto.ToEntity(utcNow, "test-user");
+
+        // Assert
+        item.Contributors.ShouldNotBeNull();
+        item.Contributors.ShouldBeEmpty(); // ?? [] branch
+        item.Subjects.ShouldNotBeNull();
+        item.Subjects.ShouldBeEmpty(); // ?? [] branch
+        item.Status.ShouldBe(ItemStatus.available); // ?? ItemStatus.available branch
+    }
+
+    [Test]
+    public void ApplyUpdate_HandlesNullCollections_WithDefaults()
+    {
+        // Arrange
+        var existingItem = new Item
+        {
+            Id = Guid.NewGuid(),
+            Title = "Original Title",
+            ItemType = ItemType.book,
+            CallNumber = "001.42",
+            ClassificationSystem = ClassificationSystem.dewey_decimal,
+            Location = new ItemLocation(1, "Original", "O-123"),
+            Status = ItemStatus.checked_out,
+            Contributors = new List<string> { "Original Author" },
+            Subjects = new List<string> { "Original Subject" },
+            CreatedAt = DateTime.UtcNow.AddDays(-1),
+            UpdatedAt = DateTime.UtcNow.AddDays(-1),
+            CreatedBy = "original-user",
+            UpdatedBy = "original-user"
+        };
+
+        var updateDto = new ItemUpdateRequestDto
+        {
+            Title = "Updated Title",
+            ItemType = ItemType.dvd,
+            CallNumber = "002.42",
+            ClassificationSystem = ClassificationSystem.library_of_congress,
+            Location = existingItem.Location.ToDto(),
+            Status = ItemStatus.available,
+            Contributors = null, // Should default to empty list
+            Subjects = null // Should default to empty list
+        };
+
+        var utcNow = DateTime.UtcNow;
+
+        // Act
+        existingItem.ApplyUpdate(updateDto, utcNow, "update-user");
+
+        // Assert
+        existingItem.Contributors.ShouldNotBeNull();
+        existingItem.Contributors.ShouldBeEmpty(); // ?? [] branch
+        existingItem.Subjects.ShouldNotBeNull();
+        existingItem.Subjects.ShouldBeEmpty(); // ?? [] branch
+        
+        // Location should remain unchanged when null
+        existingItem.Location.Floor.ShouldBe(1);
+        existingItem.Location.Section.ShouldBe("Original");
+        existingItem.Location.ShelfCode.ShouldBe("O-123");
+    }
+
+    [Test]
+    public void ApplyPatch_OnlyUpdatesNonNullFields_IgnoresNullCollections()
+    {
+        // Arrange
+        var existingItem = new Item
+        {
+            Id = Guid.NewGuid(),
+            Title = "Original Title",
+            ItemType = ItemType.book,
+            CallNumber = "001.42",
+            ClassificationSystem = ClassificationSystem.dewey_decimal,
+            Location = new ItemLocation(1, "Original", "O-123"),
+            Status = ItemStatus.available,
+            Contributors = new List<string> { "Original Author" },
+            Subjects = new List<string> { "Original Subject" },
+            Isbn = "9780743273565",
+            CreatedAt = DateTime.UtcNow.AddDays(-1),
+            UpdatedAt = DateTime.UtcNow.AddDays(-1),
+            CreatedBy = "original-user",
+            UpdatedBy = "original-user"
+        };
+
+        var patchDto = new ItemPatchRequestDto
+        {
+            Title = "Patched Title",
+            Contributors = null, // Should not update - remains original
+            Subjects = null, // Should not update - remains original
+            Isbn = "", // Empty string should update
+            Location = null, // Should not update - remains original
+            Status = null // Should not update - remains original
+        };
+
+        var utcNow = DateTime.UtcNow;
+
+        // Act
+        existingItem.ApplyPatch(patchDto, utcNow, "patch-user");
+
+        // Assert
+        // Updated fields
+        existingItem.Title.ShouldBe("Patched Title");
+        existingItem.Isbn.ShouldBe(""); // Empty string should be applied
+        
+        // Unchanged fields (null values in patch should not update)
+        existingItem.Contributors.Count.ShouldBe(1);
+        existingItem.Contributors[0].ShouldBe("Original Author");
+        existingItem.Subjects.Count.ShouldBe(1);
+        existingItem.Subjects[0].ShouldBe("Original Subject");
+        existingItem.Status.ShouldBe(ItemStatus.available);
+        existingItem.Location.Floor.ShouldBe(1);
+        existingItem.Location.Section.ShouldBe("Original");
+        existingItem.Location.ShelfCode.ShouldBe("O-123");
+    }
 }
