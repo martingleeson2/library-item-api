@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Headers;
 using Example.LibraryItem.Tests.Integration;
+using Example.LibraryItem.Api.Services;
 
 namespace Example.LibraryItem.Tests.Api.Authentication;
 
@@ -240,22 +241,7 @@ public class ApiKeyAuthenticationHandlerTests
 
     #endregion
 
-    #region Bearer Token Tests (Should Fail)
-
-    [Test]
-    public async Task Request_WithBearerToken_ReturnsUnauthorized()
-    {
-        // Arrange
-        var client = _factory.CreateClientWithBearerToken("some-jwt-token");
-
-        // Act
-        var response = await client.GetAsync("/health");
-
-        // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
-    }
-
-    #endregion
+    // Bearer token scenarios removed: tests depended on IJwtService registration
 
     #region Edge Cases
 

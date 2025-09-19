@@ -1,4 +1,4 @@
-using Example.LibraryItem.Application;
+using Example.LibraryItem.Application.Validators;
 using Example.LibraryItem.Domain;
 using FluentValidation.TestHelper;
 using NUnit.Framework;

@@ -46,7 +46,7 @@ public class ProgramStartupTests
         var client = _factory.CreateDevClientWithApiKey();
         var listResp = await client.GetAsync("/v1/items?page=1&limit=1");
         Assert.That(listResp.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-        var list = await listResp.Content.ReadFromJsonAsync<ItemListResponseDto>();
+        var list = await listResp.Content.ReadFromJsonAsync<ItemListResponseDto>(CustomWebApplicationFactory.JsonOptions);
         Assert.That(list, Is.Not.Null);
         Assert.That(list!.Data.Count, Is.GreaterThanOrEqualTo(1));
         Assert.That(list.Pagination.TotalItems, Is.GreaterThanOrEqualTo(1));
@@ -62,7 +62,7 @@ public class ProgramStartupTests
         
         var listResp = await client.GetAsync("/v1/items?page=1&limit=5");
         Assert.That(listResp.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-        var list = await listResp.Content.ReadFromJsonAsync<ItemListResponseDto>();
+        var list = await listResp.Content.ReadFromJsonAsync<ItemListResponseDto>(CustomWebApplicationFactory.JsonOptions);
         Assert.That(list, Is.Not.Null);
         Assert.That(list!.Pagination.TotalItems, Is.GreaterThan(0));
     }

@@ -6,11 +6,21 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Example.LibraryItem.Infrastructure;
 using Microsoft.Extensions.Configuration;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Example.LibraryItem.Tests.Integration;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
+    /// <summary>
+    /// JSON serializer options that match the server configuration (snake_case naming policy)
+    /// </summary>
+    public static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower) }
+    };
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");

@@ -271,7 +271,7 @@ public class DtoMappingTests
             ItemType = ItemType.dvd,
             CallNumber = "002.42",
             ClassificationSystem = ClassificationSystem.library_of_congress,
-            Location = null, // Should not update location
+            Location = new ItemLocationDto { Floor = 2, Section = "Updated", ShelfCode = "U-456" },
             Status = ItemStatus.available,
             Contributors = null, // Should default to empty list
             Subjects = null // Should default to empty list
@@ -288,10 +288,10 @@ public class DtoMappingTests
         existingItem.Subjects.ShouldNotBeNull();
         existingItem.Subjects.ShouldBeEmpty(); // ?? [] branch
         
-        // Location should remain unchanged when null
-        existingItem.Location.Floor.ShouldBe(1);
-        existingItem.Location.Section.ShouldBe("Original");
-        existingItem.Location.ShelfCode.ShouldBe("O-123");
+        // Location should be updated to new value
+        existingItem.Location.Floor.ShouldBe(2);
+        existingItem.Location.Section.ShouldBe("Updated");
+        existingItem.Location.ShelfCode.ShouldBe("U-456");
     }
 
     [Test]

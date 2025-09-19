@@ -1,11 +1,10 @@
 using FluentValidation;
-using Example.LibraryItem.Domain;
 
-namespace Example.LibraryItem.Application
+namespace Example.LibraryItem.Application.Validators
 {
     /// <summary>
     /// Validator for ItemUpdateRequestDto following standardized DTO validation patterns
-    /// </summary>
+    /// </summary>`
     public class ItemUpdateValidator : AbstractValidator<ItemUpdateRequestDto>
     {
         public ItemUpdateValidator()

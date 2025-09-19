@@ -36,7 +36,7 @@ public class HttpUserContextFinalTests
     {
         // Arrange - Create HttpContext with null User
         var mockContext = new Mock<HttpContext>();
-        mockContext.Setup(c => c.User).Returns((ClaimsPrincipal?)null);
+        mockContext.Setup(c => c.User).Returns<ClaimsPrincipal>(null!);
         var mockAccessor = new TestHttpContextAccessor
         {
             HttpContext = mockContext.Object

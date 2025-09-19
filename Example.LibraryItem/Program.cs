@@ -15,6 +15,11 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.HttpLogging;
 using Example.LibraryItem.Application.Handlers;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Http.Json;
+// JWT-related usings removed
+using Example.LibraryItem.Application.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +27,20 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton(TimeProvider.System);
+
+// Configure JSON options for snake_case naming policy (matches our API design)
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower));
+});
+
+// Also configure general JSON options for consistency
+builder.Services.Configure<JsonOptions>(options =>
+{
+    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseLower));
+});
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo 
@@ -35,7 +54,7 @@ builder.Services.AddSwaggerGen(c =>
     var apiKeyDescription = "API Key via X-API-Key header";
     if (builder.Environment.IsDevelopment())
     {
-        apiKeyDescription += "\n\n**Development Keys:**\n- `dev-key`\n- `test-key`\n- `local-development-key`";
+        apiKeyDescription += "\n\n**Development Key:**\n- `dev-key` (default value)";
     }
     
     c.AddSecurityDefinition(ApiKeyDefaults.Scheme, new OpenApiSecurityScheme
@@ -47,18 +66,7 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = ApiKeyDefaults.Scheme
     });
     
-    // JWT Bearer authentication (for future use)
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Description = "JWT Authorization header using the Bearer scheme.",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT"
-    });
-    
-    // For now, require API Key authentication globally
+    // Configure API Key authentication in OpenAPI
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -66,6 +74,12 @@ builder.Services.AddSwaggerGen(c =>
             Array.Empty<string>()
         }
     });
+    
+    // Configure enums to display as strings instead of integers
+    c.SchemaFilter<EnumSchemaFilter>();
+    
+    // Provide realistic examples for all DTOs
+    c.SchemaFilter<SwaggerExampleFilter>();
 });
 
 // HTTP Logging
@@ -103,8 +117,8 @@ else
 }
 
 
-// Authentication/Authorization: ApiKey as per OpenAPI contract
-// Note: JWT Bearer authentication would require Microsoft.AspNetCore.Authentication.JwtBearer package
+
+// Authentication/Authorization: Support both API Key and JWT Bearer
 builder.Services.AddAuthentication(ApiKeyDefaults.Scheme)
     .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>(
         ApiKeyDefaults.Scheme, 
@@ -116,7 +130,27 @@ builder.Services.AddAuthentication(ApiKeyDefaults.Scheme)
             options.HeaderName = "X-API-Key";
         });
 
-builder.Services.AddAuthorization();
+// JWT support removed - API Key authentication remains.
+
+// Configure authorization policies for different user roles
+builder.Services.AddAuthorization(options =>
+{
+    // Default policy allows API Key authentication
+    options.DefaultPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .AddAuthenticationSchemes(ApiKeyDefaults.Scheme)
+        .RequireAuthenticatedUser()
+        .Build();
+
+    // Admin-only policy for sensitive operations
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireRole("admin")
+              .AddAuthenticationSchemes(ApiKeyDefaults.Scheme));
+
+    // Librarian policy for library management operations
+    options.AddPolicy("LibrarianOnly", policy =>
+        policy.RequireRole("librarian", "admin")
+              .AddAuthenticationSchemes(ApiKeyDefaults.Scheme));
+});
 
 // Error handling services
 builder.Services.AddErrorHandling();

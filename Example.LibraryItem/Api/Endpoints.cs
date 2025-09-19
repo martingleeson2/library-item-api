@@ -67,6 +67,8 @@ namespace Example.LibraryItem.Api
                     ? Results.NotFound(helpers.CreateNotFoundResponse(http))
                     : Results.Ok(item);
             })
+            .WithSummary("Get library item by ID")
+            .WithDescription("Retrieves a specific library item using its unique identifier. Use ID `11111111-1111-1111-1111-111111111111` to test with seeded 'The Great Gatsby' data.")
             .Produces<ItemDto>(StatusCodes.Status200OK)
             .Produces<ErrorResponseDto>(StatusCodes.Status400BadRequest)
             .Produces<ErrorResponseDto>(StatusCodes.Status401Unauthorized)
@@ -115,6 +117,8 @@ namespace Example.LibraryItem.Api
                     ? Results.NotFound(helpers.CreateNotFoundResponse(http))
                     : Results.Ok(updated);
             })
+            .WithSummary("Update library item by ID")
+            .WithDescription("Completely replaces an existing library item with new data. Use ID `11111111-1111-1111-1111-111111111111` to test updating 'The Great Gatsby'.")
             .Produces<ItemDto>(StatusCodes.Status200OK)
             .Produces<ErrorResponseDto>(StatusCodes.Status400BadRequest)
             .Produces<ValidationErrorResponseDto>(StatusCodes.Status422UnprocessableEntity)
@@ -142,6 +146,8 @@ namespace Example.LibraryItem.Api
                     ? Results.NotFound(helpers.CreateNotFoundResponse(http))
                     : Results.Ok(updated);
             })
+            .WithSummary("Partially update library item by ID")
+            .WithDescription("Updates only the specified fields of an existing library item. Use ID `11111111-1111-1111-1111-111111111111` to test patching 'The Great Gatsby'.")
             .Produces<ItemDto>(StatusCodes.Status200OK)
             .Produces<ErrorResponseDto>(StatusCodes.Status400BadRequest)
             .Produces<ValidationErrorResponseDto>(StatusCodes.Status422UnprocessableEntity)
@@ -162,6 +168,8 @@ namespace Example.LibraryItem.Api
                 var deleted = await handler.HandleAsync(itemId);
                 return deleted ? Results.NoContent() : Results.NotFound(helpers.CreateNotFoundResponse(http));
             })
+            .WithSummary("Delete library item by ID")
+            .WithDescription("Permanently removes a library item from the collection. Use ID `22222222-2222-2222-2222-222222222222` to test deleting 'To Kill a Mockingbird' (avoid deleting the main example item).")
             .Produces(StatusCodes.Status204NoContent)
             .Produces<ErrorResponseDto>(StatusCodes.Status400BadRequest)
             .Produces<ErrorResponseDto>(StatusCodes.Status401Unauthorized)

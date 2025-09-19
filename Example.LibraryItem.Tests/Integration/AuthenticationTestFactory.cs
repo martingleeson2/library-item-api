@@ -41,6 +41,11 @@ public class AuthenticationTestFactory : WebApplicationFactory<Program>
                 ["DisableHttpsRedirection"] = "true",
                 ["DisableHttpLogging"] = "true",
                 ["Database:Provider"] = "inmemory",
+                ["Jwt:Enabled"] = "true",
+                ["Jwt:SecretKey"] = "LibraryManagementSecretKey2024!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890",
+                ["Jwt:Issuer"] = "library-management-api",
+                ["Jwt:Audience"] = "library-users",
+                ["Jwt:ExpiryMinutes"] = "60"
             };
 
             // Add API keys
@@ -75,17 +80,6 @@ public class AuthenticationTestFactory : WebApplicationFactory<Program>
     }
 
     /// <summary>
-    /// Creates an HTTP client with JWT Bearer token.
-    /// </summary>
-    public HttpClient CreateClientWithBearerToken(string token)
-    {
-        var client = CreateClient();
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        return client;
-    }
-
-    /// <summary>
     /// Creates an HTTP client without any authentication headers.
     /// </summary>
     public HttpClient CreateUnauthenticatedClient()
@@ -94,21 +88,4 @@ public class AuthenticationTestFactory : WebApplicationFactory<Program>
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         return client;
     }
-}
-
-/// <summary>
-/// Static factory methods for creating common authentication test scenarios.
-/// </summary>
-public static class AuthenticationTestScenarios
-{
-    /// <summary>
-    /// API Key authentication only.
-    /// </summary>
-    public static string[] ApiKeyOnly(string[]? validKeys = null) => 
-        validKeys ?? ["test-api-key", "another-test-key"];
-
-    /// <summary>
-    /// Custom API key configuration with specific keys.
-    /// </summary>
-    public static string[] CustomApiKeys(params string[] validKeys) => validKeys;
 }

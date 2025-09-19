@@ -42,9 +42,9 @@ public class ItemsEndpointsHappyPathTests
             Language = "en"
         };
 
-        var createResp = await client.PostAsJsonAsync("/v1/items/", create);
+        var createResp = await client.PostAsJsonAsync("/v1/items/", create, CustomWebApplicationFactory.JsonOptions);
         Assert.That(createResp.StatusCode, Is.EqualTo(HttpStatusCode.Created));
-        var created = await createResp.Content.ReadFromJsonAsync<ItemDto>();
+        var created = await createResp.Content.ReadFromJsonAsync<ItemDto>(CustomWebApplicationFactory.JsonOptions);
         Assert.That(created, Is.Not.Null);
     Assert.That(created!.Id, Is.Not.EqualTo(Guid.Empty));
     Assert.That(created.Title, Is.EqualTo(create.Title));
@@ -53,13 +53,13 @@ public class ItemsEndpointsHappyPathTests
 
         var getResp = await client.GetAsync($"/v1/items/{id}");
         Assert.That(getResp.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-        var fetched = await getResp.Content.ReadFromJsonAsync<ItemDto>();
+        var fetched = await getResp.Content.ReadFromJsonAsync<ItemDto>(CustomWebApplicationFactory.JsonOptions);
         Assert.That(fetched, Is.Not.Null);
     Assert.That(fetched!.Id, Is.EqualTo(id));
 
         var listResp = await client.GetAsync("/v1/items?page=1&limit=10");
         Assert.That(listResp.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-        var list = await listResp.Content.ReadFromJsonAsync<ItemListResponseDto>();
+        var list = await listResp.Content.ReadFromJsonAsync<ItemListResponseDto>(CustomWebApplicationFactory.JsonOptions);
         Assert.That(list, Is.Not.Null);
     Assert.That(list!.Data.Count, Is.GreaterThanOrEqualTo(1));
     Assert.That(list.Pagination.Page, Is.EqualTo(1));
@@ -78,9 +78,9 @@ public class ItemsEndpointsHappyPathTests
             Pages = 360,
             Language = "en"
         };
-        var updateResp = await client.PutAsJsonAsync($"/v1/items/{id}", update);
+        var updateResp = await client.PutAsJsonAsync($"/v1/items/{id}", update, CustomWebApplicationFactory.JsonOptions);
         Assert.That(updateResp.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-        var updated = await updateResp.Content.ReadFromJsonAsync<ItemDto>();
+        var updated = await updateResp.Content.ReadFromJsonAsync<ItemDto>(CustomWebApplicationFactory.JsonOptions);
         Assert.That(updated, Is.Not.Null);
     Assert.That(updated!.Title, Is.EqualTo(update.Title));
     Assert.That(updated.Pages, Is.EqualTo(update.Pages));
@@ -90,9 +90,9 @@ public class ItemsEndpointsHappyPathTests
             Subtitle = "20th Anniversary",
             Pages = 365
         };
-        var patchResp = await client.PatchAsJsonAsync($"/v1/items/{id}", patch);
+        var patchResp = await client.PatchAsJsonAsync($"/v1/items/{id}", patch, CustomWebApplicationFactory.JsonOptions);
         Assert.That(patchResp.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-        var patched = await patchResp.Content.ReadFromJsonAsync<ItemDto>();
+        var patched = await patchResp.Content.ReadFromJsonAsync<ItemDto>(CustomWebApplicationFactory.JsonOptions);
         Assert.That(patched, Is.Not.Null);
     Assert.That(patched!.Subtitle, Is.EqualTo("20th Anniversary"));
     Assert.That(patched.Pages, Is.EqualTo(365));

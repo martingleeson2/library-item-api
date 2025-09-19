@@ -1,20 +1,39 @@
 using FluentValidation;
 using Example.LibraryItem.Domain;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace Example.LibraryItem.Application
 {
     public record ListItemsQuery(
-        [FromQuery(Name = "page")] int Page,
-        [FromQuery(Name = "limit")] int Limit,
-        [FromQuery(Name = "title")] string? Title,
-        [FromQuery(Name = "author")] string? Author,
-        [FromQuery(Name = "isbn")] string? Isbn,
+        [FromQuery(Name = "page")]
+        [Range(1, int.MaxValue, ErrorMessage = "Page must be greater than or equal to 1")]
+        int Page,
+        
+        [FromQuery(Name = "limit")]
+        [Range(1, 100, ErrorMessage = "Limit must be between 1 and 100")]
+        int Limit,
+        [FromQuery(Name = "title")]
+        [MaxLength(500, ErrorMessage = "Title filter cannot exceed 500 characters")]
+        string? Title,
+        
+        [FromQuery(Name = "author")]
+        [MaxLength(255, ErrorMessage = "Author filter cannot exceed 255 characters")]
+        string? Author,
+        
+        [FromQuery(Name = "isbn")]
+        [RegularExpression(@"^(?:978|979)?[0-9]{9}[0-9X]$", ErrorMessage = "ISBN format is invalid")]
+        string? Isbn,
         [FromQuery(Name = "item_type")] ItemType? ItemType,
         [FromQuery(Name = "status")] ItemStatus? Status,
         [FromQuery(Name = "collection")] string? Collection,
-        [FromQuery(Name = "location_floor")] int? LocationFloor, 
-        [FromQuery(Name = "location_section")] string? LocationSection, 
+        [FromQuery(Name = "location_floor")]
+        [Range(-2, 20, ErrorMessage = "Floor must be between -2 and 20")]
+        int? LocationFloor, 
+        
+        [FromQuery(Name = "location_section")]
+        [MaxLength(10, ErrorMessage = "Location section cannot exceed 10 characters")]
+        string? LocationSection, 
         [FromQuery(Name = "call_number")] string? CallNumber,
         [FromQuery(Name = "publication_year_from")] int? PublicationYearFrom, 
         [FromQuery(Name = "publication_year_to")] int? PublicationYearTo,

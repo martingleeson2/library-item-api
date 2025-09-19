@@ -22,7 +22,6 @@ public class DevelopmentWebApplicationFactory : WebApplicationFactory<Program>
                 ["DisableHttpLogging"] = "true",
                 ["Database:Provider"] = "inmemory",
                 ["ApiKeys:0"] = "dev-key",
-                ["ApiKeys:1"] = "test-key",
             };
             configBuilder.AddInMemoryCollection(inMemorySettings!);
         });

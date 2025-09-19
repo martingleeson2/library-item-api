@@ -82,7 +82,7 @@ public class ItemsEndpointsValidationTests
             Location = null! // Missing location should fail
         };
 
-        var response = await client.PostAsJsonAsync("/v1/items/", invalidCreate);
+        var response = await client.PostAsJsonAsync("/v1/items/", invalidCreate, CustomWebApplicationFactory.JsonOptions);
         
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.UnprocessableEntity));
     }
@@ -103,8 +103,8 @@ public class ItemsEndpointsValidationTests
             Status = ItemStatus.available
         };
 
-        var createResp = await client.PostAsJsonAsync("/v1/items/", create);
-        var created = await createResp.Content.ReadFromJsonAsync<ItemDto>();
+        var createResp = await client.PostAsJsonAsync("/v1/items/", create, CustomWebApplicationFactory.JsonOptions);
+        var created = await createResp.Content.ReadFromJsonAsync<ItemDto>(CustomWebApplicationFactory.JsonOptions);
         Assert.That(created, Is.Not.Null);
 
         // Now try to update with invalid data
@@ -118,7 +118,7 @@ public class ItemsEndpointsValidationTests
             Status = ItemStatus.available
         };
 
-        var response = await client.PutAsJsonAsync($"/v1/items/{created!.Id}", invalidUpdate);
+        var response = await client.PutAsJsonAsync($"/v1/items/{created!.Id}", invalidUpdate, CustomWebApplicationFactory.JsonOptions);
         
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.UnprocessableEntity));
     }
